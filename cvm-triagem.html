@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVM Time Game — Triagem de Candidatos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --laranja: #F06414;
+    --navy: #28288C;
+    --laranja-light: #FF8C42;
+    --navy-light: #3D3DAA;
+    --bg: #0E0E1A;
+    --surface: #16162A;
+    --surface2: #1E1E38;
+    --border: rgba(240,100,20,0.2);
+    --text: #F0EEE8;
+    --muted: #8886A8;
+    --success: #2ECC71;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(240,100,20,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(40,40,140,0.2) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(240,100,20,0.1);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 20px;
+    margin-bottom: 24px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--laranja);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .logo-badge span {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--laranja);
+  }
+
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .header h1 em {
+    font-style: normal;
+    color: var(--laranja);
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Progress */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 4px;
+    margin-bottom: 40px;
+    overflow: hidden;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--laranja), var(--laranja-light));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  /* Steps */
+  .step {
+    display: none;
+    animation: fadeUp 0.4s ease both;
+  }
+  .step.active { display: block; }
+
+  /* Section label */
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--laranja);
+    margin-bottom: 20px;
+  }
+
+  .section-tag::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    background: var(--laranja);
+    border-radius: 2px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover { border-color: var(--border); }
+
+  .card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .card .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* Form fields */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--laranja);
+    box-shadow: 0 0 0 3px rgba(240,100,20,0.15);
+  }
+
+  .field textarea { resize: vertical; min-height: 90px; }
+
+  .field select option { background: #1E1E38; }
+
+  /* Radio / Checkbox options */
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+
+  .option-item {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .option-item input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .option-label .opt-marker {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    margin-top: 1px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option-item input[type="checkbox"] + .option-label .opt-marker {
+    border-radius: 6px;
+  }
+
+  .option-item input:checked + .option-label {
+    border-color: var(--laranja);
+    background: rgba(240,100,20,0.08);
+  }
+
+  .option-item input:checked + .option-label .opt-marker {
+    background: var(--laranja);
+    border-color: var(--laranja);
+  }
+
+  .option-item input:checked + .option-label .opt-marker::after {
+    content: '✓';
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+  }
+
+  .opt-text strong {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .opt-text small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* Scenario card */
+  .scenario-box {
+    background: rgba(40,40,140,0.2);
+    border: 1px solid rgba(40,40,140,0.4);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #C8C6E8;
+  }
+
+  .scenario-box strong {
+    display: block;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--navy-light);
+    color: #8080CC;
+  }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--laranja);
+    color: white;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .btn-primary:hover {
+    background: var(--laranja-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(240,100,20,0.3);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* Score display */
+  .score-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(240,100,20,0.1);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--laranja);
+  }
+
+  /* Success */
+  .success-screen {
+    display: none;
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .success-screen.active { display: block; }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--laranja), var(--laranja-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 24px;
+    box-shadow: 0 20px 40px rgba(240,100,20,0.3);
+  }
+
+  .success-screen h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .success-screen p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0 auto 32px;
+  }
+
+  .result-summary {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+  }
+
+  .result-row:last-child { border-bottom: none; }
+
+  .result-row .label { color: var(--muted); }
+  .result-row .value { font-weight: 600; }
+  .result-row .value.good { color: var(--success); }
+  .result-row .value.mid { color: var(--laranja); }
+  .result-row .value.low { color: #E74C3C; }
+
+  /* Range slider */
+  .slider-wrap { position: relative; }
+
+  input[type="range"] {
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 100px;
+    outline: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    accent-color: var(--laranja);
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Mobile */
+  @media (max-width: 500px) {
+    .options-grid.cols-2 { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .wrapper { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      <span>Clube Viajar Mais · Triagem</span>
+    </div>
+    <h1>CVM <em>Time Game</em></h1>
+    <p>Formulário de triagem para candidatos à vaga de Consultor(a) de Viagens. Leva cerca de 8 minutos. Seja honesto(a) — não há resposta certa ou errada para tudo!</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-label">
+    <span id="stepLabel">Etapa 1 de 5</span>
+    <span id="stepPct">0%</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+  </div>
+
+  <!-- STEP 1: Dados pessoais -->
+  <div class="step active" id="step1">
+    <div class="section-tag">Dados Pessoais</div>
+    <div class="card">
+      <h2>Vamos começar! 👋</h2>
+      <p class="subtitle">Precisamos de alguns dados básicos para identificar sua candidatura.</p>
+
+      <div class="field">
+        <label>Nome completo *</label>
+        <input type="text" id="nome" placeholder="Seu nome completo">
+      </div>
+      <div class="field">
+        <label>WhatsApp *</label>
+        <input type="tel" id="whatsapp" placeholder="(31) 99999-9999">
+      </div>
+      <div class="field">
+        <label>E-mail *</label>
+        <input type="email" id="email" placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="field">
+        <label>Cidade onde mora *</label>
+        <input type="text" id="cidade" placeholder="Ex: Sete Lagoas - MG">
+      </div>
+      <div class="field">
+        <label>Você já trabalhou com vendas antes?</label>
+        <div class="options-grid">
+          <label class="option-item">
+            <input type="radio" name="exp_vendas" value="sim_formal">
+            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, formalmente</strong><small>Emprego registrado em vendas</small></span></span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="exp_vendas" value="sim_informal">
+            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, informalmente</strong><small>Autônomo, revendas, etc.</small></span></span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="exp_vendas" value="nao">
+            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não ainda</strong><small>Mas tenho vontade de aprender</small></span></span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-primary" onclick="goTo(2)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Perfil comportamental -->
+  <div class="step" id="step2">
+    <div class="section-tag">Perfil Comportamental</div>
+    <div class="card">
+      <h2>Como você age no trabalho? 🧠</h2>
+      <p class="subtitle">Escolha a opção que melhor representa você. Seja honesto — não há resposta errada!</p>
+
+      <div class="field">
+        <label>Em um dia agitado com muitos clientes ao mesmo tempo, você tende a:</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="comp1" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Assumir o controle</strong><small>Organizar tudo rapidamente e tomar decisões</small></span></span></label>
+          <label class="option-item"><input type="radio" name="comp1" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Animar a galera</strong><small>Manter o clima leve e motivar a equipe</small></span></span></label>
+          <label class="option-item"><input type="radio" name="comp1" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Focar na qualidade</strong><small>Atender cada cliente com atenção e cuidado</small></span></span></label>
+          <label class="option-item"><input type="radio" name="comp1" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Manter a calma</strong><small>Seguir o processo sem se estressar</small></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Quando você não bate uma meta, sua reação natural é:</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="comp2" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Analisar o que errei e traçar um novo plano</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="comp2" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pedir ajuda à equipe ou ao gestor</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="comp2" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Fico chateado(a) mas continuo tentando</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="comp2" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Revisar os processos para entender a falha</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>O que mais te motiva no trabalho?</label>
+        <div class="options-grid cols-2">
+          <label class="option-item"><input type="checkbox" name="motivacao" value="resultado"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Bater metas</strong></span></span></label>
+          <label class="option-item"><input type="checkbox" name="motivacao" value="pessoas"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ajudar pessoas</strong></span></span></label>
+          <label class="option-item"><input type="checkbox" name="motivacao" value="aprendizado"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Aprender coisas novas</strong></span></span></label>
+          <label class="option-item"><input type="checkbox" name="motivacao" value="reconhecimento"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Reconhecimento</strong></span></span></label>
+          <label class="option-item"><input type="checkbox" name="motivacao" value="estabilidade"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Estabilidade</strong></span></span></label>
+          <label class="option-item"><input type="checkbox" name="motivacao" value="autonomia"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Autonomia</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Como você se descreveria em uma palavra?</label>
+        <input type="text" id="umapalavra" placeholder="Ex: determinada, comunicativa, organizado...">
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(3)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Conhecimento em vendas -->
+  <div class="step" id="step3">
+    <div class="section-tag">Conhecimento em Vendas</div>
+    <div class="card">
+      <h2>Hora de pensar em vendas 💼</h2>
+      <p class="subtitle">Questões sobre situações reais do dia a dia de um consultor de viagens.</p>
+
+      <div class="field">
+        <div class="scenario-box">
+          <strong>📍 Situação 1</strong>
+          Uma cliente chega na loja e diz: <em>"Quero uma viagem para a praia, mas está tudo muito caro."</em> O que você faz?
+        </div>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="venda1" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Mostro as opções mais baratas disponíveis</strong><small>Foco no preço para não perdê-la</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda1" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pergunto mais sobre o que ela espera da viagem</strong><small>Entendo o sonho dela antes de oferecer</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda1" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ofereço parcelamento e facilidades</strong><small>Resolvo a objeção de preço direto</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda1" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sugiro destinos alternativos mais em conta</strong><small>Redireciono para o que cabe no bolso</small></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="scenario-box">
+          <strong>📍 Situação 2</strong>
+          Um casal quer viajar para a lua de mel, mas está em dúvida entre <em>Maldivas e Cancún</em>. Qual sua abordagem?
+        </div>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="venda2" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Recomendo logo o mais popular</strong><small>Cancún é mais conhecido, vai agradar</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda2" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pergunto sobre orçamento, estilo e sonho do casal</strong><small>Personalizo a indicação ao perfil deles</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda2" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Apresento os dois com pros e contras</strong><small>Deixo eles decidirem com informação</small></span></span></label>
+          <label class="option-item"><input type="radio" name="venda2" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Indico o de maior valor — Maldivas</strong><small>Lua de mel é momento único, vale investir</small></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Em uma escala de 1 a 10, quanto você está disposto(a) a ser avaliado(a) por metas de vendas?</label>
+        <div class="slider-wrap">
+          <input type="range" id="metaSlider" min="1" max="10" value="7" oninput="document.getElementById('metaVal').textContent=this.value">
+          <div class="slider-labels">
+            <span>Prefiro ter estabilidade</span>
+            <span id="metaVal">7</span>
+            <span>Adoro metas! 🔥</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Você já utilizou ou conhece alguma plataforma de vendas de viagens? (Ex: Trend, Argo, Visual, CVC, etc.)</label>
+        <input type="text" id="plataformas" placeholder="Nome(s) ou 'Não conheço ainda'">
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(2)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(4)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Afinidade com viagens -->
+  <div class="step" id="step4">
+    <div class="section-tag">Afinidade com Viagens</div>
+    <div class="card">
+      <h2>Você e o mundo das viagens ✈️</h2>
+      <p class="subtitle">Um bom consultor de viagens vende melhor quando ama o que faz. Conta pra gente!</p>
+
+      <div class="field">
+        <label>Já viajou para fora do Brasil?</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="viajou" value="sim_varios"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, vários países</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="viajou" value="sim_um"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, um país</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="viajou" value="nao_quero"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não, mas quero muito</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="viajou" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não tenho interesse em viajar</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Qual destino você mais sonha em vender (ou visitar)?</label>
+        <input type="text" id="destinosonho" placeholder="Ex: Europa, Maldivas, Nordeste Brasileiro...">
+      </div>
+
+      <div class="field">
+        <label>O que você acha mais emocionante em ajudar alguém a viajar?</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="emocao" value="sonho"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Realizar o sonho de alguém</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="emocao" value="descoberta"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ver que as pessoas crescem viajando</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="emocao" value="experiencia"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Criar experiências únicas</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="emocao" value="confianca"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>A confiança que o cliente deposita em mim</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Você segue algum perfil de viagens nas redes sociais ou consome conteúdo sobre turismo?</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="conteudo" value="sim_muito"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, sou muito antenado(a)</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="conteudo" value="sim_pouco"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Às vezes, quando aparece</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="conteudo" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não costumo consumir</strong></span></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(3)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(5)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Lógica e disponibilidade -->
+  <div class="step" id="step5">
+    <div class="section-tag">Raciocínio & Disponibilidade</div>
+    <div class="card">
+      <h2>Últimas perguntas! 🎯</h2>
+      <p class="subtitle">Quase lá. Apenas alguns detalhes práticos e um desafio rápido de lógica.</p>
+
+      <div class="field">
+        <div class="scenario-box">
+          <strong>🧩 Desafio de lógica</strong>
+          Um pacote para Cancún custa R$ 4.800 por pessoa. Um casal quer ir e tem um desconto de 15% na segunda passagem. Qual o valor total que o casal pagaria?
+        </div>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="logica1" value="errado1"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 8.880</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="logica1" value="certo"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 9.120</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="logica1" value="errado2"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 8.160</strong></span></span></label>
+          <label class="option-item"><input type="radio" name="logica1" value="errado3"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 9.600</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="scenario-box">
+          <strong>🕐 Horário da vaga — Shopping Sete Lagoas</strong>
+          A loja funciona de <strong style="color:#F0EEE8">segunda a sábado das 10h às 22h</strong> e aos <strong style="color:#F0EEE8">domingos das 14h às 20h</strong>. Os domingos e feriados são cobertos por escala rotativa — nem todo domingo será trabalhado.
+        </div>
+
+        <label>Você tem disponibilidade para trabalhar nesse horário?</label>
+        <div class="options-grid">
+          <label class="option-item"><input type="radio" name="disponibilidade" value="sim_integral"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, tenho disponibilidade total</strong><small>Seg–sáb 10h–22h e escala de domingos</small></span></span></label>
+          <label class="option-item"><input type="radio" name="disponibilidade" value="sim_ressalva"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, com uma ressalva</strong><small>Explico na pergunta abaixo</small></span></span></label>
+          <label class="option-item"><input type="radio" name="disponibilidade" value="nao_domingo"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não consigo trabalhar aos domingos</strong><small>Tenho impedimento fixo</small></span></span></label>
+          <label class="option-item"><input type="radio" name="disponibilidade" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não tenho disponibilidade para esse horário</strong></span></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Se marcou "com ressalva", nos conte qual é:</label>
+        <input type="text" id="ressalva_horario" placeholder="Ex: tenho curso às terças à noite, mas o restante está liberado...">
+      </div>
+
+      <div class="field">
+        <label>Expectativa de remuneração mensal (fixo + comissão)</label>
+        <select id="salario">
+          <option value="" disabled selected>Selecione uma faixa</option>
+          <option value="ate1500">Até R$ 1.500</option>
+          <option value="1500a2500">R$ 1.500 a R$ 2.500</option>
+          <option value="2500a3500">R$ 2.500 a R$ 3.500</option>
+          <option value="acima3500">Acima de R$ 3.500</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Por que você quer trabalhar na CVM? (pode ser curto e direto!)</label>
+        <textarea id="motivacao_cvm" placeholder="Conta pra gente em 2-3 frases..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Alguma pergunta ou recado pra gente?</label>
+        <textarea id="recado" placeholder="Opcional — fique à vontade!"></textarea>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(4)">← Voltar</button>
+      <button class="btn btn-primary" onclick="submitForm()">Enviar minha triagem ✈️</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✈️</div>
+    <h2>Triagem enviada com sucesso!</h2>
+    <p>Obrigado(a) por dedicar seu tempo. Nossa equipe vai analisar suas respostas e entrar em contato em breve pelo WhatsApp.</p>
+
+    <div class="result-summary" id="resultSummary"></div>
+
+    <p style="color: var(--muted); font-size: 13px;">📍 Vaga: Consultor(a) de Viagens · Shopping Sete Lagoas · CVM</p>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 5;
+
+  function goTo(step) {
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    currentStep = step;
+    document.getElementById(`step${currentStep}`).classList.add('active');
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    const pct = Math.round(((currentStep - 1) / totalSteps) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('stepLabel').textContent = `Etapa ${currentStep} de ${totalSteps}`;
+    document.getElementById('stepPct').textContent = pct + '%';
+  }
+
+  function getRadioValue(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : null;
+  }
+
+  function calcScore() {
+    let score = 0;
+    let total = 0;
+
+    // Vendas situação 1: B é melhor (descoberta de necessidade)
+    const v1 = getRadioValue('venda1');
+    total += 2;
+    if (v1 === 'B') score += 2;
+    else if (v1 === 'C' || v1 === 'D') score += 1;
+
+    // Vendas situação 2: B é melhor
+    const v2 = getRadioValue('venda2');
+    total += 2;
+    if (v2 === 'B') score += 2;
+    else if (v2 === 'C') score += 1;
+
+    // Lógica: R$9.120 é correto (4800 + 4800*0.85)
+    const l1 = getRadioValue('logica1');
+    total += 3;
+    if (l1 === 'certo') score += 3;
+
+    // Comportamental — sem certo/errado, apenas sinaliza
+    const comp1 = getRadioValue('comp1');
+    const comp2 = getRadioValue('comp2');
+
+    // Afinidade — valoriza quem tem conexão com viagens
+    const viajou = getRadioValue('viajou');
+    total += 1;
+    if (viajou === 'sim_varios' || viajou === 'sim_um' || viajou === 'nao_quero') score += 1;
+
+    const conteudo = getRadioValue('conteudo');
+    total += 1;
+    if (conteudo === 'sim_muito') score += 1;
+    else if (conteudo === 'sim_pouco') score += 0.5;
+
+    // Meta slider
+    const metaVal = parseInt(document.getElementById('metaSlider').value);
+    total += 2;
+    if (metaVal >= 8) score += 2;
+    else if (metaVal >= 6) score += 1;
+
+    return { score: Math.round(score), total, pct: Math.round((score / total) * 100) };
+  }
+
+  function getProfileTag(comp1) {
+    const map = {
+      'A': '🔴 Dominante (Alta energia, orientado a resultado)',
+      'B': '🟡 Influente (Comunicativo, engaja pessoas)',
+      'C': '🔵 Analítico (Cuidadoso, foco na qualidade)',
+      'D': '🟢 Estável (Calmo, segue processos)'
+    };
+    return map[comp1] || '— Não respondido';
+  }
+
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxETk6-zorrhbYFaA0_B58mJ3QEghh3H-4xfX7hAqgNx-V45K34SauY-cUbOirNKBUr-g/exec';
+
+  function submitForm() {
+    const nome = document.getElementById('nome').value || 'Candidato(a)';
+    const { score, total, pct } = calcScore();
+    const comp1 = getRadioValue('comp1');
+    const disponibilidade = getRadioValue('disponibilidade');
+    const salario = document.getElementById('salario').value;
+
+    let nivel = '';
+    let nivelClass = '';
+    if (pct >= 75) { nivel = '🟢 Alto potencial'; nivelClass = 'good'; }
+    else if (pct >= 50) { nivel = '🟡 Potencial mediano'; nivelClass = 'mid'; }
+    else { nivel = '🔴 Precisa de atenção'; nivelClass = 'low'; }
+
+    const dispMap = {
+      'sim_integral': '✅ Disponibilidade total (seg–sáb + escala dom)',
+      'sim_ressalva': '⚠️ Disponível com ressalva',
+      'nao_domingo': '❌ Não pode aos domingos',
+      'nao': '❌ Sem disponibilidade para o horário'
+    };
+
+    const salMap = {
+      'ate1500': 'Até R$ 1.500',
+      '1500a2500': 'R$ 1.500 – R$ 2.500',
+      '2500a3500': 'R$ 2.500 – R$ 3.500',
+      'acima3500': 'Acima de R$ 3.500'
+    };
+
+    // Monta payload completo
+    const payload = {
+      nome,
+      whatsapp: document.getElementById('whatsapp').value,
+      email: document.getElementById('email').value,
+      cidade: document.getElementById('cidade').value,
+      exp_vendas: getRadioValue('exp_vendas'),
+      comp1: getRadioValue('comp1'),
+      comp2: getRadioValue('comp2'),
+      motivacao: Array.from(document.querySelectorAll('input[name="motivacao"]:checked')).map(el => el.value).join(', '),
+      umapalavra: document.getElementById('umapalavra').value,
+      venda1: getRadioValue('venda1'),
+      venda2: getRadioValue('venda2'),
+      metaSlider: document.getElementById('metaSlider').value,
+      plataformas: document.getElementById('plataformas').value,
+      viajou: getRadioValue('viajou'),
+      destinosonho: document.getElementById('destinosonho').value,
+      emocao: getRadioValue('emocao'),
+      conteudo: getRadioValue('conteudo'),
+      disponibilidade: dispMap[disponibilidade] || disponibilidade,
+      ressalva_horario: document.getElementById('ressalva_horario').value,
+      salario: salMap[salario] || salario,
+      motivacao_cvm: document.getElementById('motivacao_cvm').value,
+      recado: document.getElementById('recado').value,
+      pontuacao: `${score}/${total} (${pct}%)`,
+      classificacao: nivel
+    };
+
+    // Envia para Google Sheets (no-cors)
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {}); // silencia erro de CORS — o dado chega mesmo assim
+
+    document.getElementById('resultSummary').innerHTML = `
+      <div class="result-row"><span class="label">Candidato(a)</span><span class="value">${nome}</span></div>
+      <div class="result-row"><span class="label">Pontuação técnica</span><span class="value ${nivelClass}">${score}/${total} pontos · ${pct}%</span></div>
+      <div class="result-row"><span class="label">Perfil comportamental</span><span class="value">${getProfileTag(comp1)}</span></div>
+      <div class="result-row"><span class="label">Disponibilidade</span><span class="value">${dispMap[disponibilidade] || '—'}</span></div>
+      <div class="result-row"><span class="label">Expectativa salarial</span><span class="value">${salMap[salario] || '—'}</span></div>
+      <div class="result-row"><span class="label">Classificação</span><span class="value ${nivelClass}">${nivel}</span></div>
+    `;
+
+    // Esconde steps
+    for (let i = 1; i <= totalSteps; i++) {
+      document.getElementById(`step${i}`).classList.remove('active');
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('stepLabel').textContent = 'Concluído!';
+    document.getElementById('stepPct').textContent = '100%';
+
+    document.getElementById('successScreen').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
