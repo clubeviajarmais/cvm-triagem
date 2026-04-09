@@ -52,7 +52,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Muli
 .ci-desc{font-size:11px;color:rgba(255,255,255,.55);line-height:1.5;}
 .info-box{background:#eef3fb;border:1px solid rgba(40,40,140,.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:var(--az);line-height:1.6;}
 .field{margin-bottom:16px;}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:6px;}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--t2);margin-bottom:6px;}
 .field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--borda);border-radius:10px;font-family:'Mulish',sans-serif;font-size:13px;background:var(--bg);color:var(--t1);transition:border-color .2s,box-shadow .2s;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lj);box-shadow:0 0 0 3px rgba(240,100,20,.1);}
 .field textarea{resize:vertical;min-height:80px;line-height:1.5;}
@@ -362,8 +362,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Muli
         <label class="oc" onclick="osel(this,'qp2')"><input type="radio" name="qp2" value="D"><div><div class="oc-lbl">Revisar os processos para entender a falha técnica</div></div></label>
       </div>
     </div>
-    <div class="field"><label>Como você se descreveria em uma palavra?</label><input type="text" id="umapalavra" placeholder="Ex: determinada, comunicativo, organizada..."></div>
-    <div class="field"><label>O que mais te motiva no trabalho? <small>(até 2 opções)</small></label>
+    <div class="field"><label>Como você se descreveria em uma palavra? <span class="req">*</span></label><input type="text" id="umapalavra" placeholder="Ex: determinada, comunicativo, organizada..."></div>
+    <div class="field"><label>O que mais te motiva no trabalho? <span class="req">*</span> <small>(até 2 opções)</small></label>
       <div class="opts g2" id="motiv">
         <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="metas"><div><div class="oc-lbl">Bater metas</div></div></label>
         <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="pessoas"><div><div class="oc-lbl">Ajudar pessoas</div></div></label>
@@ -430,7 +430,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Muli
   <div class="st">Você e o mundo das viagens</div>
   <div class="ss">Mais um pequeno desafio de cálculo e perguntas sobre turismo.</div>
   <div class="card">
-    <div class="field"><label>Já viajou para fora do Brasil?</label>
+    <div class="field"><label>Já viajou para fora do Brasil? <span class="req">*</span></label>
       <div class="opts g2" id="qviajou">
         <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="varios"><div><div class="oc-lbl">Sim — vários países</div></div></label>
         <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="um"><div><div class="oc-lbl">Sim — um país</div></div></label>
@@ -438,8 +438,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Muli
         <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="nao"><div><div class="oc-lbl">Não tenho interesse em viajar</div></div></label>
       </div>
     </div>
-    <div class="field"><label>Qual destino você mais sonha em vender (ou visitar)?</label><input type="text" id="destino" placeholder="Ex: Europa, Maldivas, Nordeste Brasileiro..."></div>
-    <div class="field"><label>Você acompanha conteúdo sobre viagens nas redes sociais?</label>
+    <div class="field"><label>Qual destino você mais sonha em vender (ou visitar)? <span class="req">*</span></label><input type="text" id="destino" placeholder="Ex: Europa, Maldivas, Nordeste Brasileiro..."></div>
+    <div class="field"><label>Você acompanha conteúdo sobre viagens nas redes sociais? <span class="req">*</span></label>
       <div class="opts" id="qconteudo">
         <label class="oc" onclick="osel(this,'qconteudo')"><input type="radio" name="qconteudo" value="muito"><div><div class="oc-lbl">Sim, sou muito antenado(a) sobre destinos e novidades</div></div></label>
         <label class="oc" onclick="osel(this,'qconteudo')"><input type="radio" name="qconteudo" value="pouco"><div><div class="oc-lbl">Às vezes, quando aparece no feed</div></div></label>
@@ -447,7 +447,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Muli
       </div>
     </div>
     <div class="field">
-      <div class="scen"><strong>🧩 Desafio de cálculo</strong>Um pacote para Cancún custa <em>R$ 4.800 por pessoa</em>. Um casal quer viajar e você oferece <em>15% de desconto na segunda passagem</em>. Qual o valor total?</div>
+      <div class="scen"><strong>🧩 Desafio de cálculo <span style="color:var(--rd);font-style:normal;">*</span></strong>Um pacote para Cancún custa <em>R$ 4.800 por pessoa</em>. Um casal quer viajar e você oferece <em>15% de desconto na segunda passagem</em>. Qual o valor total?</div>
       <div class="opts g2" id="qlogica">
         <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="certo"><div><div class="oc-lbl">R$ 8.880</div></div></label>
         <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="e1"><div><div class="oc-lbl">R$ 9.120</div></div></label>
@@ -545,8 +545,18 @@ function val(s){
   if(s===1){if(!g('nome'))return e('Preencha seu nome.');if(!g('whatsapp'))return e('Preencha seu WhatsApp.');if(!g('cidade'))return e('Preencha sua cidade.');if(!g('escolaridade'))return e('Selecione sua escolaridade.');if(!g('origem'))return e('Nos diga como soube da vaga.');if(!r('exp'))return e('Informe sua experiência.');}
   if(s===2){if(!r('vaga'))return e('Selecione uma vaga.');if(!r('disp'))return e('Informe sua disponibilidade.');}
   if(s===3){if(!r('qc1')||!r('qc2')||!r('qc3')||!r('qc4')||!r('qc5'))return e('Responda todas as perguntas de cultura.');}
-  if(s===4){if(!r('qp1')||!r('qp2'))return e('Responda as perguntas de perfil.');}
+  if(s===4){
+    if(!r('qp1')||!r('qp2'))return e('Responda as perguntas de perfil.');
+    if(!document.querySelectorAll('input[name="motiv"]:checked').length)return e('Selecione pelo menos uma opção de motivação.');
+    if(!g('umapalavra'))return e('Nos diga uma palavra que te descreve.');
+  }
   if(s===5){if(!r('qv1')||!r('qv2')||!r('qv3')||!r('qv4'))return e('Responda todas as situações de vendas.');}
+  if(s===6){
+    if(!r('qviajou'))return e('Responda se já viajou para fora do Brasil.');
+    if(!g('destino'))return e('Nos diga qual destino você mais sonha em vender ou visitar.');
+    if(!r('qconteudo'))return e('Responda se você acompanha conteúdo sobre viagens.');
+    if(!r('qlogica'))return e('Responda o desafio de cálculo.');
+  }
   if(s===7){if(!g('salario'))return e('Selecione a faixa de renda que você quer atingir.');if(!g('motivo'))return e('Nos conte por que quer trabalhar na CVM.');}
   return true;
 }
