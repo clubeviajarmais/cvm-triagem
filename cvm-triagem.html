@@ -3,967 +3,618 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CVM Time Game — Triagem de Candidatos</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>CVM · Processo Seletivo 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --laranja: #F06414;
-    --navy: #28288C;
-    --laranja-light: #FF8C42;
-    --navy-light: #3D3DAA;
-    --bg: #0E0E1A;
-    --surface: #16162A;
-    --surface2: #1E1E38;
-    --border: rgba(240,100,20,0.2);
-    --text: #F0EEE8;
-    --muted: #8886A8;
-    --success: #2ECC71;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(240,100,20,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(40,40,140,0.2) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 48px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .logo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(240,100,20,0.1);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 8px 20px;
-    margin-bottom: 24px;
-  }
-
-  .logo-dot {
-    width: 8px; height: 8px;
-    background: var(--laranja);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  .logo-badge span {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--laranja);
-  }
-
-  .header h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(28px, 5vw, 42px);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 12px;
-  }
-
-  .header h1 em {
-    font-style: normal;
-    color: var(--laranja);
-  }
-
-  .header p {
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.6;
-    max-width: 480px;
-    margin: 0 auto;
-  }
-
-  /* Progress */
-  .progress-bar-wrap {
-    background: var(--surface2);
-    border-radius: 100px;
-    height: 4px;
-    margin-bottom: 40px;
-    overflow: hidden;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--laranja), var(--laranja-light));
-    border-radius: 100px;
-    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 8px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  /* Steps */
-  .step {
-    display: none;
-    animation: fadeUp 0.4s ease both;
-  }
-  .step.active { display: block; }
-
-  /* Section label */
-  .section-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--laranja);
-    margin-bottom: 20px;
-  }
-
-  .section-tag::before {
-    content: '';
-    width: 20px;
-    height: 2px;
-    background: var(--laranja);
-    border-radius: 2px;
-  }
-
-  /* Card */
-  .card {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 16px;
-    transition: border-color 0.3s;
-  }
-
-  .card:hover { border-color: var(--border); }
-
-  .card h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    line-height: 1.3;
-  }
-
-  .card .subtitle {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 24px;
-    line-height: 1.5;
-  }
-
-  /* Form fields */
-  .field {
-    margin-bottom: 20px;
-  }
-
-  .field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    margin-bottom: 8px;
-    letter-spacing: 0.02em;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: var(--laranja);
-    box-shadow: 0 0 0 3px rgba(240,100,20,0.15);
-  }
-
-  .field textarea { resize: vertical; min-height: 90px; }
-
-  .field select option { background: #1E1E38; }
-
-  /* Radio / Checkbox options */
-  .options-grid {
-    display: grid;
-    gap: 10px;
-  }
-
-  .options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-
-  .option-item {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .option-item input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .option-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    background: var(--surface2);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  .option-label .opt-marker {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
-    margin-top: 1px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .option-item input[type="checkbox"] + .option-label .opt-marker {
-    border-radius: 6px;
-  }
-
-  .option-item input:checked + .option-label {
-    border-color: var(--laranja);
-    background: rgba(240,100,20,0.08);
-  }
-
-  .option-item input:checked + .option-label .opt-marker {
-    background: var(--laranja);
-    border-color: var(--laranja);
-  }
-
-  .option-item input:checked + .option-label .opt-marker::after {
-    content: '✓';
-    font-size: 11px;
-    color: white;
-    font-weight: 700;
-  }
-
-  .opt-text strong {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 2px;
-  }
-
-  .opt-text small {
-    color: var(--muted);
-    font-size: 12px;
-  }
-
-  /* Scenario card */
-  .scenario-box {
-    background: rgba(40,40,140,0.2);
-    border: 1px solid rgba(40,40,140,0.4);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #C8C6E8;
-  }
-
-  .scenario-box strong {
-    display: block;
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    color: var(--navy-light);
-    color: #8080CC;
-  }
-
-  /* Navigation */
-  .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    gap: 12px;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    border-radius: 100px;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background: var(--laranja);
-    color: white;
-    flex: 1;
-    justify-content: center;
-  }
-
-  .btn-primary:hover {
-    background: var(--laranja-light);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(240,100,20,0.3);
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .btn-ghost:hover {
-    color: var(--text);
-    border-color: rgba(255,255,255,0.2);
-  }
-
-  /* Score display */
-  .score-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(240,100,20,0.1);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--laranja);
-  }
-
-  /* Success */
-  .success-screen {
-    display: none;
-    text-align: center;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .success-screen.active { display: block; }
-
-  .success-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, var(--laranja), var(--laranja-light));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 24px;
-    box-shadow: 0 20px 40px rgba(240,100,20,0.3);
-  }
-
-  .success-screen h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 12px;
-  }
-
-  .success-screen p {
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.6;
-    max-width: 400px;
-    margin: 0 auto 32px;
-  }
-
-  .result-summary {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 20px;
-    padding: 24px;
-    text-align: left;
-    margin-bottom: 24px;
-  }
-
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 14px;
-  }
-
-  .result-row:last-child { border-bottom: none; }
-
-  .result-row .label { color: var(--muted); }
-  .result-row .value { font-weight: 600; }
-  .result-row .value.good { color: var(--success); }
-  .result-row .value.mid { color: var(--laranja); }
-  .result-row .value.low { color: #E74C3C; }
-
-  /* Range slider */
-  .slider-wrap { position: relative; }
-
-  input[type="range"] {
-    width: 100%;
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 100px;
-    outline: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    accent-color: var(--laranja);
-  }
-
-  .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* Mobile */
-  @media (max-width: 500px) {
-    .options-grid.cols-2 { grid-template-columns: 1fr; }
-    .card { padding: 20px; }
-    .wrapper { padding: 24px 16px 60px; }
-  }
+:root{--lj:#F06414;--az:#28288C;--bg:#f5f4f0;--card:#fff;--borda:#e5e3dc;--t1:#1c1c2e;--t2:#6b6880;--t3:#b0adc5;--gr:#00a878;--gbg:#e6f7f2;--gd:#027a57;--rd:#e8325a;--rbg:#fdeef2;--rdk:#b01f3d;--am:#f5a623;--abg:#fef5e6;--amdk:#8a5200;--sh:0 2px 12px rgba(0,0,0,.07);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'Mulish',sans-serif;font-size:14px;}
+.hero{background:linear-gradient(145deg,var(--az) 0%,#1a1a6e 55%,#2d1660 100%);padding:44px 24px 52px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-90px;right:-90px;width:340px;height:340px;background:radial-gradient(circle,rgba(240,100,20,.22) 0%,transparent 65%);}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,.05) 0%,transparent 70%);}
+.hi{position:relative;z-index:1;max-width:620px;margin:0 auto;}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(240,100,20,.18);border:1px solid rgba(240,100,20,.4);border-radius:20px;padding:5px 16px;margin-bottom:18px;font-size:11px;font-weight:700;color:#ffb088;letter-spacing:1.5px;text-transform:uppercase;}
+.ld{width:6px;height:6px;background:var(--lj);border-radius:50%;animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,38px);font-weight:800;color:#fff;line-height:1.15;margin-bottom:10px;}
+.hero h1 em{color:var(--lj);font-style:normal;}
+.hero p{font-size:13px;color:rgba(255,255,255,.65);max-width:460px;margin:0 auto 24px;line-height:1.6;}
+.hstats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.hs .n{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--lj);}
+.hs .l{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.pbar-wrap{background:var(--az);padding:14px 24px;position:sticky;top:0;z-index:50;border-bottom:3px solid var(--lj);}
+.pbar-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+.pb-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.8);white-space:nowrap;min-width:90px;}
+.pb-track{flex:1;height:5px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;}
+.pb-fill{height:100%;background:linear-gradient(90deg,var(--lj),#ff8c42);border-radius:3px;transition:width .4s ease;}
+.pb-pct{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--lj);min-width:30px;text-align:right;}
+.pb-dots{display:flex;gap:5px;margin-left:8px;}
+.pbd{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.3);transition:all .3s;flex-shrink:0;}
+.pbd.done{background:var(--lj);border-color:var(--lj);color:#fff;}
+.pbd.cur{background:rgba(240,100,20,.2);border-color:var(--lj);color:var(--lj);}
+.main{padding:28px 18px 80px;max-width:640px;margin:0 auto;width:100%;}
+.pg{display:none;animation:fi .35s ease both;}
+.pg.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ey{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lj);margin-bottom:3px;}
+.st{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px;}
+.ss{font-size:12px;color:var(--t2);margin-bottom:20px;line-height:1.5;}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:22px;box-shadow:var(--sh);margin-bottom:14px;}
+.card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.5;}
+.cult-card{background:linear-gradient(135deg,var(--az) 0%,#1a1a6e 100%);border-radius:16px;padding:22px;margin-bottom:14px;border-left:4px solid var(--lj);}
+.cult-card .ct{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;}
+.cult-card .cs{font-size:12px;color:rgba(255,255,255,.6);margin-bottom:18px;line-height:1.5;}
+.ci{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08);}
+.ci:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.ci-ico{width:32px;height:32px;border-radius:8px;background:rgba(240,100,20,.2);border:1px solid rgba(240,100,20,.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ci-tit{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+.ci-desc{font-size:11px;color:rgba(255,255,255,.55);line-height:1.5;}
+.info-box{background:#eef3fb;border:1px solid rgba(40,40,140,.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:var(--az);line-height:1.6;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--borda);border-radius:10px;font-family:'Mulish',sans-serif;font-size:13px;background:var(--bg);color:var(--t1);transition:border-color .2s,box-shadow .2s;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lj);box-shadow:0 0 0 3px rgba(240,100,20,.1);}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.frow{grid-template-columns:1fr;}}
+.req{color:var(--rd);}
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opts.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+@media(max-width:480px){.opts.g2{grid-template-columns:1fr;}}
+.oc{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border:1.5px solid var(--borda);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--card);}
+.oc:hover{border-color:var(--lj);background:#fff9f5;}
+.oc input[type=radio],.oc input[type=checkbox]{width:17px;height:17px;accent-color:var(--lj);flex-shrink:0;margin-top:2px;cursor:pointer;}
+.oc.sel{border-color:var(--lj);background:#fff9f5;}
+.oc-lbl{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3;}
+.oc-sub{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.4;}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:6px;}
+@media(max-width:480px){.vgrid{grid-template-columns:1fr;}}
+.vc{border:2px solid var(--borda);border-radius:14px;padding:15px;cursor:pointer;transition:all .2s;background:var(--card);position:relative;}
+.vc:hover{border-color:var(--lj);}
+.vc.sel{border-color:var(--lj);background:#fff9f5;}
+.vc input{position:absolute;opacity:0;width:0;height:0;}
+.vurg{position:absolute;top:9px;right:9px;background:var(--rd);color:#fff;font-size:8px;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.5px;text-transform:uppercase;}
+.vloja{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t2);font-weight:700;margin-bottom:3px;}
+.vtit{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:7px;line-height:1.2;}
+.vtags{display:flex;flex-wrap:wrap;gap:4px;}
+.vtag{padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;}
+.taz{background:#eef3fb;color:var(--az);}
+.tgr{background:var(--gbg);color:var(--gd);}
+.tor{background:#fff3ec;color:var(--lj);}
+.cq{background:var(--card);border:1.5px solid var(--borda);border-radius:14px;padding:18px;margin-bottom:14px;}
+.cq-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.cq-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ico-lj{background:#fff3ec;border:1px solid rgba(240,100,20,.2);}
+.ico-rd{background:var(--rbg);border:1px solid rgba(232,50,90,.2);}
+.ico-az{background:#eef3fb;border:1px solid rgba(40,40,140,.15);}
+.ico-gr{background:var(--gbg);border:1px solid rgba(0,168,120,.2);}
+.ico-am{background:var(--abg);border:1px solid rgba(245,166,35,.2);}
+.cq-tit{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--t1);margin-bottom:3px;line-height:1.3;}
+.cq-sub{font-size:12px;color:var(--t2);line-height:1.5;}
+.scen{background:#f0f0fa;border:1px solid rgba(40,40,140,.12);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.6;}
+.scen strong{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--lj);font-weight:700;margin-bottom:5px;}
+.scen em{color:var(--t1);font-style:normal;font-weight:600;}
+.btn-row{display:flex;gap:10px;margin-top:22px;}
+.btn-nx{flex:1;padding:14px 22px;background:linear-gradient(135deg,var(--lj),#e8520a);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
+.btn-nx:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(240,100,20,.3);}
+.btn-nx:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.btn-bk{padding:14px 18px;background:var(--card);color:var(--t2);border:1.5px solid var(--borda);border-radius:12px;font-family:'Mulish',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-bk:hover{border-color:var(--t2);color:var(--t1);}
+.res-hero{text-align:center;padding:20px 0 10px;}
+.res-icon{font-size:52px;margin-bottom:14px;}
+.res-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;}
+.res-score{display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border-radius:20px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;}
+.rs-alto{background:var(--gbg);color:var(--gd);}
+.rs-med{background:var(--abg);color:var(--amdk);}
+.rs-baixo{background:var(--rbg);color:var(--rdk);}
+.res-desc{font-size:13px;color:var(--t2);line-height:1.6;max-width:480px;margin:0 auto 20px;}
+.res-rows{border-top:1px solid var(--borda);margin-top:16px;padding-top:16px;}
+.rrow{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--borda);font-size:12px;}
+.rrow:last-child{border-bottom:none;}
+.rrow .rl{color:var(--t2);flex-shrink:0;width:120px;}
+.rrow .rv{font-weight:700;text-align:right;flex:1;}
+.rv-g{color:var(--gd);}
+.rv-a{color:var(--amdk);}
+.rv-r{color:var(--rdk);}
+.sc-bars{margin:16px 0 0;}
+.sb-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.sb-lbl{font-size:11px;font-weight:600;color:var(--t2);width:120px;flex-shrink:0;}
+.sb-track{flex:1;height:7px;background:var(--borda);border-radius:4px;overflow:hidden;}
+.sb-fill{height:100%;border-radius:4px;transition:width 1.1s ease;}
+.sb-val{font-size:11px;font-weight:700;min-width:30px;text-align:right;}
+@media(max-width:480px){.btn-row{flex-direction:column;}.btn-bk{order:2;}.pbar-wrap{padding:12px 14px;}.pb-dots{display:none;}.main{padding:20px 12px 60px;}}
 </style>
 </head>
 <body>
 
-<div class="wrapper">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="logo-badge">
-      <div class="logo-dot"></div>
-      <span>Clube Viajar Mais · Triagem</span>
-    </div>
-    <h1>CVM <em>Time Game</em></h1>
-    <p>Formulário de triagem para candidatos à vaga de Consultor(a) de Viagens. Leva cerca de 8 minutos. Seja honesto(a) — não há resposta certa ou errada para tudo!</p>
-  </div>
-
-  <!-- Progress -->
-  <div class="progress-label">
-    <span id="stepLabel">Etapa 1 de 5</span>
-    <span id="stepPct">0%</span>
-  </div>
-  <div class="progress-bar-wrap">
-    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-  </div>
-
-  <!-- STEP 1: Dados pessoais -->
-  <div class="step active" id="step1">
-    <div class="section-tag">Dados Pessoais</div>
-    <div class="card">
-      <h2>Vamos começar! 👋</h2>
-      <p class="subtitle">Precisamos de alguns dados básicos para identificar sua candidatura.</p>
-
-      <div class="field">
-        <label>Nome completo *</label>
-        <input type="text" id="nome" placeholder="Seu nome completo">
+<div class="hero">
+  <div class="hi">
+    <div class="hbadge"><div class="ld"></div> Vagas abertas · 2026</div>
+    <h1>Transforme sua paixão<br>por viagens em <em>carreira</em></h1>
+    <p>Aqui você aprende sobre destinos incríveis, cresce junto com o time e ainda colhe benefícios que vão muito além do salário.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto 24px;text-align:left;">
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;flex-shrink:0;">✈️</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:2px;">Famtours</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.4;">Viagens para conhecer os destinos mais vendidos</div>
+        </div>
       </div>
-      <div class="field">
-        <label>WhatsApp *</label>
-        <input type="tel" id="whatsapp" placeholder="(31) 99999-9999">
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;flex-shrink:0;">💳</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:2px;">Cartão iFood Benefícios</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.4;">Alimentação e refeição incluídos</div>
+        </div>
       </div>
-      <div class="field">
-        <label>E-mail *</label>
-        <input type="email" id="email" placeholder="seuemail@exemplo.com">
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;flex-shrink:0;">🌟</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:2px;">Programa de pontos</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.4;">Ganhe pontos por vendas e metas batidas — troque por viagens ou produtos</div>
+        </div>
       </div>
-      <div class="field">
-        <label>Cidade onde mora *</label>
-        <input type="text" id="cidade" placeholder="Ex: Sete Lagoas - MG">
-      </div>
-      <div class="field">
-        <label>Você já trabalhou com vendas antes?</label>
-        <div class="options-grid">
-          <label class="option-item">
-            <input type="radio" name="exp_vendas" value="sim_formal">
-            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, formalmente</strong><small>Emprego registrado em vendas</small></span></span>
-          </label>
-          <label class="option-item">
-            <input type="radio" name="exp_vendas" value="sim_informal">
-            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, informalmente</strong><small>Autônomo, revendas, etc.</small></span></span>
-          </label>
-          <label class="option-item">
-            <input type="radio" name="exp_vendas" value="nao">
-            <span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não ainda</strong><small>Mas tenho vontade de aprender</small></span></span>
-          </label>
+      <div style="background:rgba(240,100,20,.18);border:1px solid rgba(240,100,20,.35);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;flex-shrink:0;">💰</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#ffb088;margin-bottom:2px;">Ganhe fazendo o que ama</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.4;">Salários, comissões e bônus acima do mercado</div>
         </div>
       </div>
     </div>
-    <div class="nav">
-      <button class="btn btn-primary" onclick="goTo(2)">Continuar →</button>
+    <p style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;">Processo seletivo leva cerca de 12 minutos. Seja honesto(a) — filtramos pelo perfil certo, não pela resposta certa.</p>
+    <div class="hstats" style="margin-top:20px;">
+      <div class="hs"><div class="n">11</div><div class="l">Anos de história</div></div>
+      <div class="hs"><div class="n">3</div><div class="l">Lojas físicas</div></div>
+      <div class="hs"><div class="n">20K+</div><div class="l">Clientes ativos</div></div>
+      <div class="hs"><div class="n">9</div><div class="l">Vagas abertas</div></div>
     </div>
   </div>
+</div>
 
-  <!-- STEP 2: Perfil comportamental -->
-  <div class="step" id="step2">
-    <div class="section-tag">Perfil Comportamental</div>
-    <div class="card">
-      <h2>Como você age no trabalho? 🧠</h2>
-      <p class="subtitle">Escolha a opção que melhor representa você. Seja honesto — não há resposta errada!</p>
-
-      <div class="field">
-        <label>Em um dia agitado com muitos clientes ao mesmo tempo, você tende a:</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="comp1" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Assumir o controle</strong><small>Organizar tudo rapidamente e tomar decisões</small></span></span></label>
-          <label class="option-item"><input type="radio" name="comp1" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Animar a galera</strong><small>Manter o clima leve e motivar a equipe</small></span></span></label>
-          <label class="option-item"><input type="radio" name="comp1" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Focar na qualidade</strong><small>Atender cada cliente com atenção e cuidado</small></span></span></label>
-          <label class="option-item"><input type="radio" name="comp1" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Manter a calma</strong><small>Seguir o processo sem se estressar</small></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Quando você não bate uma meta, sua reação natural é:</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="comp2" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Analisar o que errei e traçar um novo plano</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="comp2" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pedir ajuda à equipe ou ao gestor</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="comp2" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Fico chateado(a) mas continuo tentando</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="comp2" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Revisar os processos para entender a falha</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>O que mais te motiva no trabalho?</label>
-        <div class="options-grid cols-2">
-          <label class="option-item"><input type="checkbox" name="motivacao" value="resultado"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Bater metas</strong></span></span></label>
-          <label class="option-item"><input type="checkbox" name="motivacao" value="pessoas"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ajudar pessoas</strong></span></span></label>
-          <label class="option-item"><input type="checkbox" name="motivacao" value="aprendizado"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Aprender coisas novas</strong></span></span></label>
-          <label class="option-item"><input type="checkbox" name="motivacao" value="reconhecimento"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Reconhecimento</strong></span></span></label>
-          <label class="option-item"><input type="checkbox" name="motivacao" value="estabilidade"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Estabilidade</strong></span></span></label>
-          <label class="option-item"><input type="checkbox" name="motivacao" value="autonomia"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Autonomia</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Como você se descreveria em uma palavra?</label>
-        <input type="text" id="umapalavra" placeholder="Ex: determinada, comunicativa, organizado...">
-      </div>
-    </div>
-    <div class="nav">
-      <button class="btn btn-ghost" onclick="goTo(1)">← Voltar</button>
-      <button class="btn btn-primary" onclick="goTo(3)">Continuar →</button>
+<div class="pbar-wrap">
+  <div class="pbar-inner">
+    <span class="pb-lbl" id="pb-lbl">Etapa 1 de 7</span>
+    <div class="pb-track"><div class="pb-fill" id="pb-fill" style="width:0%"></div></div>
+    <span class="pb-pct" id="pb-pct">0%</span>
+    <div class="pb-dots">
+      <div class="pbd cur" id="pd1">1</div><div class="pbd" id="pd2">2</div>
+      <div class="pbd" id="pd3">3</div><div class="pbd" id="pd4">4</div>
+      <div class="pbd" id="pd5">5</div><div class="pbd" id="pd6">6</div>
+      <div class="pbd" id="pd7">7</div>
     </div>
   </div>
+</div>
 
-  <!-- STEP 3: Conhecimento em vendas -->
-  <div class="step" id="step3">
-    <div class="section-tag">Conhecimento em Vendas</div>
-    <div class="card">
-      <h2>Hora de pensar em vendas 💼</h2>
-      <p class="subtitle">Questões sobre situações reais do dia a dia de um consultor de viagens.</p>
+<div class="main">
 
-      <div class="field">
-        <div class="scenario-box">
-          <strong>📍 Situação 1</strong>
-          Uma cliente chega na loja e diz: <em>"Quero uma viagem para a praia, mas está tudo muito caro."</em> O que você faz?
-        </div>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="venda1" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Mostro as opções mais baratas disponíveis</strong><small>Foco no preço para não perdê-la</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda1" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pergunto mais sobre o que ela espera da viagem</strong><small>Entendo o sonho dela antes de oferecer</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda1" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ofereço parcelamento e facilidades</strong><small>Resolvo a objeção de preço direto</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda1" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sugiro destinos alternativos mais em conta</strong><small>Redireciono para o que cabe no bolso</small></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="scenario-box">
-          <strong>📍 Situação 2</strong>
-          Um casal quer viajar para a lua de mel, mas está em dúvida entre <em>Maldivas e Cancún</em>. Qual sua abordagem?
-        </div>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="venda2" value="A"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Recomendo logo o mais popular</strong><small>Cancún é mais conhecido, vai agradar</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda2" value="B"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Pergunto sobre orçamento, estilo e sonho do casal</strong><small>Personalizo a indicação ao perfil deles</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda2" value="C"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Apresento os dois com pros e contras</strong><small>Deixo eles decidirem com informação</small></span></span></label>
-          <label class="option-item"><input type="radio" name="venda2" value="D"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Indico o de maior valor — Maldivas</strong><small>Lua de mel é momento único, vale investir</small></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Em uma escala de 1 a 10, quanto você está disposto(a) a ser avaliado(a) por metas de vendas?</label>
-        <div class="slider-wrap">
-          <input type="range" id="metaSlider" min="1" max="10" value="7" oninput="document.getElementById('metaVal').textContent=this.value">
-          <div class="slider-labels">
-            <span>Prefiro ter estabilidade</span>
-            <span id="metaVal">7</span>
-            <span>Adoro metas! 🔥</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Você já utilizou ou conhece alguma plataforma de vendas de viagens? (Ex: Trend, Argo, Visual, CVC, etc.)</label>
-        <input type="text" id="plataformas" placeholder="Nome(s) ou 'Não conheço ainda'">
-      </div>
+<!-- S1: DADOS -->
+<div id="s1" class="pg on">
+  <div class="ey">Etapa 1 · Identificação</div>
+  <div class="st">Seus dados</div>
+  <div class="ss">Informações básicas para identificar sua candidatura.</div>
+  <div class="card">
+    <div class="frow">
+      <div class="field"><label>Nome completo <span class="req">*</span></label><input type="text" id="nome" placeholder="Seu nome completo"></div>
+      <div class="field"><label>Idade <span class="req">*</span></label><input type="number" id="idade" placeholder="Ex: 24" min="16" max="65"></div>
     </div>
-    <div class="nav">
-      <button class="btn btn-ghost" onclick="goTo(2)">← Voltar</button>
-      <button class="btn btn-primary" onclick="goTo(4)">Continuar →</button>
+    <div class="frow">
+      <div class="field"><label>WhatsApp <span class="req">*</span></label><input type="tel" id="whatsapp" placeholder="(37) 99999-9999"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="email" placeholder="seu@email.com"></div>
     </div>
-  </div>
-
-  <!-- STEP 4: Afinidade com viagens -->
-  <div class="step" id="step4">
-    <div class="section-tag">Afinidade com Viagens</div>
-    <div class="card">
-      <h2>Você e o mundo das viagens ✈️</h2>
-      <p class="subtitle">Um bom consultor de viagens vende melhor quando ama o que faz. Conta pra gente!</p>
-
-      <div class="field">
-        <label>Já viajou para fora do Brasil?</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="viajou" value="sim_varios"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, vários países</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="viajou" value="sim_um"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, um país</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="viajou" value="nao_quero"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não, mas quero muito</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="viajou" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não tenho interesse em viajar</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Qual destino você mais sonha em vender (ou visitar)?</label>
-        <input type="text" id="destinosonho" placeholder="Ex: Europa, Maldivas, Nordeste Brasileiro...">
-      </div>
-
-      <div class="field">
-        <label>O que você acha mais emocionante em ajudar alguém a viajar?</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="emocao" value="sonho"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Realizar o sonho de alguém</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="emocao" value="descoberta"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Ver que as pessoas crescem viajando</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="emocao" value="experiencia"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Criar experiências únicas</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="emocao" value="confianca"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>A confiança que o cliente deposita em mim</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Você segue algum perfil de viagens nas redes sociais ou consome conteúdo sobre turismo?</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="conteudo" value="sim_muito"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, sou muito antenado(a)</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="conteudo" value="sim_pouco"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Às vezes, quando aparece</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="conteudo" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não costumo consumir</strong></span></span></label>
-        </div>
-      </div>
-    </div>
-    <div class="nav">
-      <button class="btn btn-ghost" onclick="goTo(3)">← Voltar</button>
-      <button class="btn btn-primary" onclick="goTo(5)">Continuar →</button>
-    </div>
-  </div>
-
-  <!-- STEP 5: Lógica e disponibilidade -->
-  <div class="step" id="step5">
-    <div class="section-tag">Raciocínio & Disponibilidade</div>
-    <div class="card">
-      <h2>Últimas perguntas! 🎯</h2>
-      <p class="subtitle">Quase lá. Apenas alguns detalhes práticos e um desafio rápido de lógica.</p>
-
-      <div class="field">
-        <div class="scenario-box">
-          <strong>🧩 Desafio de lógica</strong>
-          Um pacote para Cancún custa R$ 4.800 por pessoa. Um casal quer ir e tem um desconto de 15% na segunda passagem. Qual o valor total que o casal pagaria?
-        </div>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="logica1" value="errado1"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 8.880</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="logica1" value="certo"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 9.120</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="logica1" value="errado2"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 8.160</strong></span></span></label>
-          <label class="option-item"><input type="radio" name="logica1" value="errado3"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>R$ 9.600</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="scenario-box">
-          <strong>🕐 Horário da vaga — Shopping Sete Lagoas</strong>
-          A loja funciona de <strong style="color:#F0EEE8">segunda a sábado das 10h às 22h</strong> e aos <strong style="color:#F0EEE8">domingos das 14h às 20h</strong>. Os domingos e feriados são cobertos por escala rotativa — nem todo domingo será trabalhado.
-        </div>
-
-        <label>Você tem disponibilidade para trabalhar nesse horário?</label>
-        <div class="options-grid">
-          <label class="option-item"><input type="radio" name="disponibilidade" value="sim_integral"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, tenho disponibilidade total</strong><small>Seg–sáb 10h–22h e escala de domingos</small></span></span></label>
-          <label class="option-item"><input type="radio" name="disponibilidade" value="sim_ressalva"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Sim, com uma ressalva</strong><small>Explico na pergunta abaixo</small></span></span></label>
-          <label class="option-item"><input type="radio" name="disponibilidade" value="nao_domingo"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não consigo trabalhar aos domingos</strong><small>Tenho impedimento fixo</small></span></span></label>
-          <label class="option-item"><input type="radio" name="disponibilidade" value="nao"><span class="option-label"><span class="opt-marker"></span><span class="opt-text"><strong>Não tenho disponibilidade para esse horário</strong></span></span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Se marcou "com ressalva", nos conte qual é:</label>
-        <input type="text" id="ressalva_horario" placeholder="Ex: tenho curso às terças à noite, mas o restante está liberado...">
-      </div>
-
-      <div class="field">
-        <label>Expectativa de remuneração mensal (fixo + comissão)</label>
-        <select id="salario">
-          <option value="" disabled selected>Selecione uma faixa</option>
-          <option value="ate1500">Até R$ 1.500</option>
-          <option value="1500a2500">R$ 1.500 a R$ 2.500</option>
-          <option value="2500a3500">R$ 2.500 a R$ 3.500</option>
-          <option value="acima3500">Acima de R$ 3.500</option>
+    <div class="frow">
+      <div class="field"><label>Cidade e estado <span class="req">*</span></label><input type="text" id="cidade" placeholder="Ex: Sete Lagoas, MG"></div>
+      <div class="field"><label>Escolaridade <span class="req">*</span></label>
+        <select id="escolaridade">
+          <option value="">Selecione...</option>
+          <option value="medio_incompleto">Ensino Médio Incompleto</option>
+          <option value="medio_completo">Ensino Médio Completo</option>
+          <option value="superior_incompleto">Superior Incompleto</option>
+          <option value="superior_completo">Superior Completo</option>
+          <option value="pos">Pós-graduação</option>
         </select>
       </div>
-
-      <div class="field">
-        <label>Por que você quer trabalhar na CVM? (pode ser curto e direto!)</label>
-        <textarea id="motivacao_cvm" placeholder="Conta pra gente em 2-3 frases..."></textarea>
-      </div>
-
-      <div class="field">
-        <label>Alguma pergunta ou recado pra gente?</label>
-        <textarea id="recado" placeholder="Opcional — fique à vontade!"></textarea>
+    </div>
+    <div class="field"><label>Como ficou sabendo da vaga? <span class="req">*</span></label>
+      <select id="origem">
+        <option value="">Selecione...</option>
+        <option value="instagram">Instagram CVM</option>
+        <option value="indicacao">Indicação de amigo ou familiar</option>
+        <option value="whatsapp_grupo">Grupo de WhatsApp</option>
+        <option value="linkedin">LinkedIn</option>
+        <option value="portais">Portal de vagas</option>
+        <option value="site">Site da CVM</option>
+        <option value="ex_colaborador">Já trabalhei na CVM antes</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="field"><label>Experiência anterior <span class="req">*</span></label>
+      <div class="opts">
+        <label class="oc" onclick="osel(this,'exp')"><input type="radio" name="exp" value="turismo"><div><div class="oc-lbl">Sim — já trabalhei com turismo</div><div class="oc-sub">Agência, operadora, cia aérea, hotel</div></div></label>
+        <label class="oc" onclick="osel(this,'exp')"><input type="radio" name="exp" value="vendas"><div><div class="oc-lbl">Sim — experiência em vendas (outro setor)</div><div class="oc-sub">Atendimento ao cliente, metas, comissão</div></div></label>
+        <label class="oc" onclick="osel(this,'exp')"><input type="radio" name="exp" value="informal"><div><div class="oc-lbl">Sim — vendi de forma autônoma / informal</div><div class="oc-sub">Revendas, empreendedorismo, eventos</div></div></label>
+        <label class="oc" onclick="osel(this,'exp')"><input type="radio" name="exp" value="nenhuma"><div><div class="oc-lbl">Primeira oportunidade em vendas</div><div class="oc-sub">Sem experiência formal, mas quero aprender</div></div></label>
       </div>
     </div>
-    <div class="nav">
-      <button class="btn btn-ghost" onclick="goTo(4)">← Voltar</button>
-      <button class="btn btn-primary" onclick="submitForm()">Enviar minha triagem ✈️</button>
+  </div>
+  <div class="btn-row"><button class="btn-nx" onclick="nx(1)">Próxima etapa →</button></div>
+</div>
+
+<!-- S2: VAGA -->
+<div id="s2" class="pg">
+  <div class="ey">Etapa 2 · Vaga</div>
+  <div class="st">Qual vaga te interessa?</div>
+  <div class="ss">Escolha a que mais combina com seu perfil. Temos 9 vagas abertas.</div>
+  <div class="vgrid">
+    <label class="vc" onclick="sV(this)"><input type="radio" name="vaga" value="Consultor(a) de Viagens — Shopping Sete Lagoas"><div class="vurg">URGENTE</div><div class="vloja">Shopping Sete Lagoas</div><div class="vtit">Consultor(a) de Viagens</div><div class="vtags"><span class="vtag taz">Vendas ativas</span><span class="vtag tgr">3 vagas</span><span class="vtag tor">Comissão alta</span></div></label>
+    <label class="vc" onclick="sV(this)"><input type="radio" name="vaga" value="Consultor(a) de Viagens — Boa Vista"><div class="vurg">URGENTE</div><div class="vloja">Boa Vista · Sete Lagoas</div><div class="vtit">Consultor(a) de Viagens</div><div class="vtags"><span class="vtag taz">Loja matriz</span><span class="vtag tgr">1 vaga</span><span class="vtag tor">Time experiente</span></div></label>
+    <label class="vc" onclick="sV(this)"><input type="radio" name="vaga" value="Consultor(a) de Viagens — BH"><div class="vloja">BH · Assaí Minas Shopping</div><div class="vtit">Consultor(a) de Viagens</div><div class="vtags"><span class="vtag taz">Belo Horizonte</span><span class="vtag tgr">2 vagas</span><span class="vtag tor">Expansão</span></div></label>
+    <label class="vc" onclick="sV(this)"><input type="radio" name="vaga" value="Auxiliar de Pós-Venda — Grupo CVM"><div class="vloja">Pós-Venda · Todas as lojas</div><div class="vtit">Auxiliar de Pós-Venda</div><div class="vtags"><span class="vtag taz">Atendimento</span><span class="vtag tgr">2 vagas</span><span class="vtag tor">Suporte</span></div></label>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="field"><label>Disponibilidade de horário <span class="req">*</span></label>
+      <div class="opts">
+        <label class="oc" onclick="osel(this,'disp')"><input type="radio" name="disp" value="integral_dom"><div><div class="oc-lbl">Integral com sábados e domingos</div><div class="oc-sub">Disponível para escala rotativa aos domingos e feriados</div></div></label>
+        <label class="oc" onclick="osel(this,'disp')"><input type="radio" name="disp" value="integral_sab"><div><div class="oc-lbl">Integral — segunda a sábado</div><div class="oc-sub">Horário comercial de shopping, sem disponibilidade aos domingos</div></div></label>
+        <label class="oc" onclick="osel(this,'disp')"><input type="radio" name="disp" value="ressalva"><div><div class="oc-lbl">Disponível com uma ressalva</div><div class="oc-sub">Tenho um impedimento pontual que preciso comunicar</div></div></label>
+        <label class="oc" onclick="osel(this,'disp')"><input type="radio" name="disp" value="parcial"><div><div class="oc-lbl">Somente meio período</div><div class="oc-sub">Disponível apenas manhã ou tarde</div></div></label>
+      </div>
+    </div>
+    <div class="field"><label>Se marcou "com ressalva", descreva: <small>(opcional)</small></label><input type="text" id="ressalva" placeholder="Ex: curso às terças à noite, mas o restante está liberado"></div>
+  </div>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(2)">← Voltar</button><button class="btn-nx" onclick="nx(2)">Próxima etapa →</button></div>
+</div>
+
+<!-- S3: CULTURA -->
+<div id="s3" class="pg">
+  <div class="ey">Etapa 3 · Cultura da empresa</div>
+  <div class="st">Como a CVM funciona de verdade</div>
+  <div class="ss">Leia com atenção antes de responder. Ser honesto(a) evita frustrações para você e para nós.</div>
+
+  <div class="cult-card">
+    <div class="ct">Nossa cultura em 5 verdades</div>
+    <div class="cs">O que você vai encontrar no dia a dia — sem filtro.</div>
+    <div class="ci"><div class="ci-ico">📊</div><div><div class="ci-tit">Metas mensais com ranking público</div><div class="ci-desc">Cada consultor tem meta individual de GMV, ticket médio e penetração de seguro. O ranking fica visível para toda a equipe — na TV da loja e na reunião semanal. Quem bate comemora. Quem não bate recebe suporte para melhorar.</div></div></div>
+    <div class="ci"><div class="ci-ico">💰</div><div><div class="ci-tit">Comissão real — quanto mais você vende, mais você ganha</div><div class="ci-desc">Nossa remuneração é baseada em comissão sobre vendas, com potencial de R$ 2.000 a R$ 5.000 mensais. Você constrói sua carteira de clientes ao longo do tempo — quanto mais dedicação nos primeiros meses, mais rápido a renda cresce. Quem tem foco e aprende rápido costuma superar expectativas.</div></div></div>
+    <div class="ci"><div class="ci-ico">🤝</div><div><div class="ci-tit">Time pequeno — responsabilidade grande</div><div class="ci-desc">Somos um time enxuto. Quando alguém falta, o restante absorve. Aqui não tem "isso não é meu serviço". Colaboração não é opcional — faz parte do trabalho.</div></div></div>
+    <div class="ci"><div class="ci-ico">🎯</div><div><div class="ci-tit">Honestidade com o cliente é inegociável</div><div class="ci-desc">Ninguém vende algo que vai frustrar o cliente só para bater meta. Informação errada ou promessa que não existe são motivos de desligamento. A confiança do nosso cliente é construída em 11 anos — e não pode ser desperdiçada.</div></div></div>
+    <div class="ci"><div class="ci-ico">✈️</div><div><div class="ci-tit">Viagens são sonhos — e isso importa</div><div class="ci-desc">A família que economizou 2 anos para ir a Porto Seguro deposita confiança em você. Quem trata cada venda como uma transação — e não como um sonho realizado — não se encaixa na CVM.</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Agora responda com honestidade</div>
+    <div class="card-sub">Após ler a cultura acima, responda as perguntas abaixo. Não existe resposta certa — existe alinhamento ou não.</div>
+
+    <div class="cq">
+      <div class="cq-head"><div class="cq-ico ico-lj">📊</div><div><div class="cq-tit">Seu nome aparece num ranking visível para toda a equipe toda semana. Como você se sente com isso?</div></div></div>
+      <div class="opts" id="qc1">
+        <label class="oc" onclick="osel(this,'qc1')"><input type="radio" name="qc1" value="A"><div><div class="oc-lbl">Me motiva muito — competição saudável me faz crescer</div></div></label>
+        <label class="oc" onclick="osel(this,'qc1')"><input type="radio" name="qc1" value="B"><div><div class="oc-lbl">Me sinto confortável — gosto de saber onde estou</div></div></label>
+        <label class="oc" onclick="osel(this,'qc1')"><input type="radio" name="qc1" value="C"><div><div class="oc-lbl">Me incomoda um pouco, mas consigo lidar</div></div></label>
+        <label class="oc" onclick="osel(this,'qc1')"><input type="radio" name="qc1" value="D"><div><div class="oc-lbl">Prefiro não ser comparado(a) publicamente com colegas</div></div></label>
+      </div>
+    </div>
+
+    <div class="cq">
+      <div class="cq-head"><div class="cq-ico ico-rd">💰</div><div><div class="cq-tit">Nossa remuneração é por comissão — quanto mais você vende, mais você ganha. Como você se sente com esse modelo?</div></div></div>
+      <div class="opts" id="qc2">
+        <label class="oc" onclick="osel(this,'qc2')"><input type="radio" name="qc2" value="A"><div><div class="oc-lbl">Adoro — prefiro ter teto ilimitado a salário fixo pequeno</div></div></label>
+        <label class="oc" onclick="osel(this,'qc2')"><input type="radio" name="qc2" value="B"><div><div class="oc-lbl">Me identifico — gosto de ser recompensado(a) pelo meu esforço</div></div></label>
+        <label class="oc" onclick="osel(this,'qc2')"><input type="radio" name="qc2" value="C"><div><div class="oc-lbl">Topo — estou disposto(a) a me dedicar para construir minha carteira</div></div></label>
+        <label class="oc" onclick="osel(this,'qc2')"><input type="radio" name="qc2" value="D"><div><div class="oc-lbl">Prefiro salário fixo — comissão me deixa inseguro(a)</div></div></label>
+      </div>
+    </div>
+
+    <div class="cq">
+      <div class="cq-head"><div class="cq-ico ico-az">🤝</div><div><div class="cq-tit">Você está atendendo dois clientes quando um colega pede para cobrir o atendimento dele. O que você faz?</div></div></div>
+      <div class="opts" id="qc3">
+        <label class="oc" onclick="osel(this,'qc3')"><input type="radio" name="qc3" value="A"><div><div class="oc-lbl">Organizo os dois atendimentos e cubro — cliente não pode esperar</div></div></label>
+        <label class="oc" onclick="osel(this,'qc3')"><input type="radio" name="qc3" value="B"><div><div class="oc-lbl">Explico que estou ocupado(a) mas ofereço uma alternativa</div></div></label>
+        <label class="oc" onclick="osel(this,'qc3')"><input type="radio" name="qc3" value="C"><div><div class="oc-lbl">Ajudo sem questionar — colega em apuros, estou junto</div></div></label>
+        <label class="oc" onclick="osel(this,'qc3')"><input type="radio" name="qc3" value="D"><div><div class="oc-lbl">Cada um é responsável pelos seus clientes — não interfiro</div></div></label>
+      </div>
+    </div>
+
+    <div class="cq">
+      <div class="cq-head"><div class="cq-ico ico-gr">🎯</div><div><div class="cq-tit">Você sabe que o pacote que um cliente quer não é o ideal para ele — mas fecharia uma boa venda. O que você faz?</div></div></div>
+      <div class="opts" id="qc4">
+        <label class="oc" onclick="osel(this,'qc4')"><input type="radio" name="qc4" value="A"><div><div class="oc-lbl">Sou honesto(a) e apresento o que é melhor para ele, mesmo que a venda seja menor</div></div></label>
+        <label class="oc" onclick="osel(this,'qc4')"><input type="radio" name="qc4" value="B"><div><div class="oc-lbl">Apresento os dois e explico as diferenças — ele decide com informação</div></div></label>
+        <label class="oc" onclick="osel(this,'qc4')"><input type="radio" name="qc4" value="C"><div><div class="oc-lbl">Fecho o que ele pediu — ele é adulto e sabe o que quer</div></div></label>
+        <label class="oc" onclick="osel(this,'qc4')"><input type="radio" name="qc4" value="D"><div><div class="oc-lbl">Depende do mês — às vezes a meta fala mais alto</div></div></label>
+      </div>
+    </div>
+
+    <div class="cq">
+      <div class="cq-head"><div class="cq-ico ico-am">✈️</div><div><div class="cq-tit">Uma família chega muito empolgada com a primeira viagem da vida deles. Como isso te afeta?</div></div></div>
+      <div class="opts" id="qc5">
+        <label class="oc" onclick="osel(this,'qc5')"><input type="radio" name="qc5" value="A"><div><div class="oc-lbl">Me emociona — esse é o sentido de tudo o que faço</div></div></label>
+        <label class="oc" onclick="osel(this,'qc5')"><input type="radio" name="qc5" value="B"><div><div class="oc-lbl">Fico feliz e me dedico mais para fazer tudo certo para eles</div></div></label>
+        <label class="oc" onclick="osel(this,'qc5')"><input type="radio" name="qc5" value="C"><div><div class="oc-lbl">É legal, mas não me afeta diferente de outros atendimentos</div></div></label>
+        <label class="oc" onclick="osel(this,'qc5')"><input type="radio" name="qc5" value="D"><div><div class="oc-lbl">Fico ansioso(a) pois a responsabilidade é grande</div></div></label>
+      </div>
     </div>
   </div>
 
-  <!-- SUCCESS -->
-  <div class="success-screen" id="successScreen">
-    <div class="success-icon">✈️</div>
-    <h2>Triagem enviada com sucesso!</h2>
-    <p>Obrigado(a) por dedicar seu tempo. Nossa equipe vai analisar suas respostas e entrar em contato em breve pelo WhatsApp.</p>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(3)">← Voltar</button><button class="btn-nx" onclick="nx(3)">Próxima etapa →</button></div>
+</div>
 
-    <div class="result-summary" id="resultSummary"></div>
-
-    <p style="color: var(--muted); font-size: 13px;">📍 Vaga: Consultor(a) de Viagens · Shopping Sete Lagoas · CVM</p>
+<!-- S4: COMPORTAMENTAL -->
+<div id="s4" class="pg">
+  <div class="ey">Etapa 4 · Perfil</div>
+  <div class="st">Como você age no trabalho?</div>
+  <div class="ss">Sem resposta certa. Escolha o que representa você de verdade.</div>
+  <div class="card">
+    <div class="field"><label>Em um dia agitado com muitos clientes, você tende a:</label>
+      <div class="opts g2" id="qp1">
+        <label class="oc" onclick="osel(this,'qp1')"><input type="radio" name="qp1" value="A"><div><div class="oc-lbl">Assumir o controle</div><div class="oc-sub">Organizar e tomar decisões rápido</div></div></label>
+        <label class="oc" onclick="osel(this,'qp1')"><input type="radio" name="qp1" value="B"><div><div class="oc-lbl">Animar a galera</div><div class="oc-sub">Manter o clima leve e motivar</div></div></label>
+        <label class="oc" onclick="osel(this,'qp1')"><input type="radio" name="qp1" value="C"><div><div class="oc-lbl">Focar na qualidade</div><div class="oc-sub">Cada cliente com atenção total</div></div></label>
+        <label class="oc" onclick="osel(this,'qp1')"><input type="radio" name="qp1" value="D"><div><div class="oc-lbl">Manter a calma</div><div class="oc-sub">Seguir o processo sem estressar</div></div></label>
+      </div>
+    </div>
+    <div class="field"><label>Quando você não bate uma meta, sua reação é:</label>
+      <div class="opts" id="qp2">
+        <label class="oc" onclick="osel(this,'qp2')"><input type="radio" name="qp2" value="A"><div><div class="oc-lbl">Analisar o que errei e traçar um novo plano</div></div></label>
+        <label class="oc" onclick="osel(this,'qp2')"><input type="radio" name="qp2" value="B"><div><div class="oc-lbl">Buscar apoio do gestor para entender o que melhorar</div></div></label>
+        <label class="oc" onclick="osel(this,'qp2')"><input type="radio" name="qp2" value="C"><div><div class="oc-lbl">Fico chateado(a) mas continuo tentando</div></div></label>
+        <label class="oc" onclick="osel(this,'qp2')"><input type="radio" name="qp2" value="D"><div><div class="oc-lbl">Revisar os processos para entender a falha técnica</div></div></label>
+      </div>
+    </div>
+    <div class="field"><label>Como você se descreveria em uma palavra?</label><input type="text" id="umapalavra" placeholder="Ex: determinada, comunicativo, organizada..."></div>
+    <div class="field"><label>O que mais te motiva no trabalho? <small>(até 2 opções)</small></label>
+      <div class="opts g2" id="motiv">
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="metas"><div><div class="oc-lbl">Bater metas</div></div></label>
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="pessoas"><div><div class="oc-lbl">Ajudar pessoas</div></div></label>
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="crescimento"><div><div class="oc-lbl">Crescer na carreira</div></div></label>
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="viagens"><div><div class="oc-lbl">Viver de viagens</div></div></label>
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="estabilidade"><div><div class="oc-lbl">Estabilidade</div></div></label>
+        <label class="oc" onclick="chkSel(this,'motiv',2)"><input type="checkbox" name="motiv" value="reconhecimento"><div><div class="oc-lbl">Reconhecimento</div></div></label>
+      </div>
+    </div>
   </div>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(4)">← Voltar</button><button class="btn-nx" onclick="nx(4)">Próxima etapa →</button></div>
+</div>
+
+<!-- S5: VENDAS -->
+<div id="s5" class="pg">
+  <div class="ey">Etapa 5 · Vendas</div>
+  <div class="st">Situações reais do dia a dia</div>
+  <div class="ss">Como você agiria nessas situações concretas de atendimento?</div>
+  <div class="card">
+    <div class="field">
+      <div class="scen"><strong>📍 Situação 1 — Objeção de preço</strong>Uma cliente diz: <em>"Quero viajar para a praia, mas está tudo muito caro."</em> O que você faz?</div>
+      <div class="opts" id="qv1">
+        <label class="oc" onclick="osel(this,'qv1')"><input type="radio" name="qv1" value="A"><div><div class="oc-lbl">Mostro as opções mais baratas que encontrar</div></div></label>
+        <label class="oc" onclick="osel(this,'qv1')"><input type="radio" name="qv1" value="B"><div><div class="oc-lbl">Pergunto o que ela espera da viagem antes de mostrar qualquer preço</div></div></label>
+        <label class="oc" onclick="osel(this,'qv1')"><input type="radio" name="qv1" value="C"><div><div class="oc-lbl">Ofereço logo o parcelamento para resolver a objeção de preço</div></div></label>
+        <label class="oc" onclick="osel(this,'qv1')"><input type="radio" name="qv1" value="D"><div><div class="oc-lbl">Sugiro destinos alternativos mais baratos imediatamente</div></div></label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="scen"><strong>📍 Situação 2 — Upsell</strong>Um cliente quer comprar <em>apenas a passagem</em> para Porto Seguro. Como você conduz o atendimento?</div>
+      <div class="opts" id="qv2">
+        <label class="oc" onclick="osel(this,'qv2')"><input type="radio" name="qv2" value="A"><div><div class="oc-lbl">Emito a passagem como pedido e finalizo</div></div></label>
+        <label class="oc" onclick="osel(this,'qv2')"><input type="radio" name="qv2" value="B"><div><div class="oc-lbl">Pergunto sobre hospedagem e apresento um pacote completo — geralmente sai mais barato</div></div></label>
+        <label class="oc" onclick="osel(this,'qv2')"><input type="radio" name="qv2" value="C"><div><div class="oc-lbl">Ofereço seguro viagem junto com a passagem</div></div></label>
+        <label class="oc" onclick="osel(this,'qv2')"><input type="radio" name="qv2" value="D"><div><div class="oc-lbl">Mostro o pacote completo mas aceito se ele insistir só na passagem</div></div></label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="scen"><strong>📍 Situação 3 — Seguro viagem</strong>Um cliente vai para Cancún e pergunta se precisa de seguro. O que você responde?</div>
+      <div class="opts" id="qv3">
+        <label class="oc" onclick="osel(this,'qv3')"><input type="radio" name="qv3" value="A"><div><div class="oc-lbl">"Não é obrigatório para o México" e deixo ele decidir</div></div></label>
+        <label class="oc" onclick="osel(this,'qv3')"><input type="radio" name="qv3" value="B"><div><div class="oc-lbl">"Não é obrigatório para o México, mas recomendo fortemente — hospital no exterior pode custar dezenas de milhares de reais"</div></div></label>
+        <label class="oc" onclick="osel(this,'qv3')"><input type="radio" name="qv3" value="C"><div><div class="oc-lbl">"É obrigatório para qualquer viagem internacional"</div></div></label>
+        <label class="oc" onclick="osel(this,'qv3')"><input type="radio" name="qv3" value="D"><div><div class="oc-lbl">"Não sei ao certo, vou verificar com a gerente"</div></div></label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="scen"><strong>📍 Situação 4 — Lead sumido</strong>Um cliente pediu cotação semana passada e não deu mais resposta. O que você faz?</div>
+      <div class="opts" id="qv4">
+        <label class="oc" onclick="osel(this,'qv4')"><input type="radio" name="qv4" value="A"><div><div class="oc-lbl">Aguardo — não quero ser inconveniente</div></div></label>
+        <label class="oc" onclick="osel(this,'qv4')"><input type="radio" name="qv4" value="B"><div><div class="oc-lbl">Mando mensagem em 2-3 dias com algo relevante: nova oferta ou prazo próximo</div></div></label>
+        <label class="oc" onclick="osel(this,'qv4')"><input type="radio" name="qv4" value="C"><div><div class="oc-lbl">Ligo todos os dias até ele responder</div></div></label>
+        <label class="oc" onclick="osel(this,'qv4')"><input type="radio" name="qv4" value="D"><div><div class="oc-lbl">Descarto e foco em novos clientes</div></div></label>
+      </div>
+    </div>
+    <div class="field"><label>Você conhece alguma plataforma de reservas de viagens?</label><input type="text" id="plataformas" placeholder="Ex: Abreu, Azul Viagens, CVC, Trend... ou 'Não conheço ainda'"></div>
+  </div>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(5)">← Voltar</button><button class="btn-nx" onclick="nx(5)">Próxima etapa →</button></div>
+</div>
+
+<!-- S6: TURISMO + LOGICA -->
+<div id="s6" class="pg">
+  <div class="ey">Etapa 6 · Afinidade & Raciocínio</div>
+  <div class="st">Você e o mundo das viagens</div>
+  <div class="ss">Mais um pequeno desafio de cálculo e perguntas sobre turismo.</div>
+  <div class="card">
+    <div class="field"><label>Já viajou para fora do Brasil?</label>
+      <div class="opts g2" id="qviajou">
+        <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="varios"><div><div class="oc-lbl">Sim — vários países</div></div></label>
+        <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="um"><div><div class="oc-lbl">Sim — um país</div></div></label>
+        <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="nao_quero"><div><div class="oc-lbl">Não, mas quero muito</div></div></label>
+        <label class="oc" onclick="osel(this,'qviajou')"><input type="radio" name="qviajou" value="nao"><div><div class="oc-lbl">Não tenho interesse em viajar</div></div></label>
+      </div>
+    </div>
+    <div class="field"><label>Qual destino você mais sonha em vender (ou visitar)?</label><input type="text" id="destino" placeholder="Ex: Europa, Maldivas, Nordeste Brasileiro..."></div>
+    <div class="field"><label>Você acompanha conteúdo sobre viagens nas redes sociais?</label>
+      <div class="opts" id="qconteudo">
+        <label class="oc" onclick="osel(this,'qconteudo')"><input type="radio" name="qconteudo" value="muito"><div><div class="oc-lbl">Sim, sou muito antenado(a) sobre destinos e novidades</div></div></label>
+        <label class="oc" onclick="osel(this,'qconteudo')"><input type="radio" name="qconteudo" value="pouco"><div><div class="oc-lbl">Às vezes, quando aparece no feed</div></div></label>
+        <label class="oc" onclick="osel(this,'qconteudo')"><input type="radio" name="qconteudo" value="nao"><div><div class="oc-lbl">Não costumo acompanhar</div></div></label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="scen"><strong>🧩 Desafio de cálculo</strong>Um pacote para Cancún custa <em>R$ 4.800 por pessoa</em>. Um casal quer viajar e você oferece <em>15% de desconto na segunda passagem</em>. Qual o valor total?</div>
+      <div class="opts g2" id="qlogica">
+        <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="certo"><div><div class="oc-lbl">R$ 8.880</div></div></label>
+        <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="e1"><div><div class="oc-lbl">R$ 9.120</div></div></label>
+        <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="e2"><div><div class="oc-lbl">R$ 8.160</div></div></label>
+        <label class="oc" onclick="osel(this,'qlogica')"><input type="radio" name="qlogica" value="e3"><div><div class="oc-lbl">R$ 9.600</div></div></label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Em uma escala de 1 a 10, o quanto você topa ser avaliado(a) por metas mensais?</label>
+      <div style="text-align:center;font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--lj);margin:8px 0" id="meta-num">7</div>
+      <input type="range" id="meta-slider" min="1" max="10" value="7" oninput="document.getElementById('meta-num').textContent=this.value" style="width:100%;accent-color:var(--lj);height:4px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-top:6px"><span>Prefiro estabilidade</span><span>Adoro metas 🔥</span></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(6)">← Voltar</button><button class="btn-nx" onclick="nx(6)">Próxima etapa →</button></div>
+</div>
+
+<!-- S7: FINAL -->
+<div id="s7" class="pg">
+  <div class="ey">Etapa 7 · Finalização</div>
+  <div class="st">Última etapa — você está quase lá!</div>
+  <div class="ss">Preencha os campos abaixo e envie. Nossa equipe retorna em até 2 dias úteis.</div>
+  <div class="card">
+    <div style="background:linear-gradient(135deg,var(--az) 0%,#1a1a6e 100%);border-radius:14px;padding:18px;margin-bottom:18px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:6px;">Ganhe dinheiro fazendo o que ama</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--lj);margin-bottom:4px;">Salários, comissões e bônus acima do mercado</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);">R$ 2.000 a R$ 5.000/mês · sem teto de comissão</div>
+    </div>
+    <div class="field"><label>Qual faixa de renda você espera atingir? <span class="req">*</span></label>
+      <select id="salario">
+        <option value="">Selecione...</option>
+        <option value="2000a3000">R$ 2.000 a R$ 3.000 — quero começar bem</option>
+        <option value="3000a4000">R$ 3.000 a R$ 4.000 — minha meta inicial</option>
+        <option value="4000a5000">R$ 4.000 a R$ 5.000 — vou me dedicar para chegar aqui</option>
+        <option value="acima5000">Acima de R$ 5.000 — quero superar as expectativas</option>
+      </select>
+    </div>
+    <div class="field"><label>Por que você quer trabalhar na CVM? <span class="req">*</span></label>
+      <textarea id="motivo" placeholder="O que te atraiu para essa oportunidade? O que você quer construir aqui? Pode ser curto e direto!" rows="4"></textarea>
+    </div>
+    <div class="field"><label>Descreva uma situação em que você convenceu alguém de algo. <small>(opcional)</small></label>
+      <textarea id="situacao" placeholder="No trabalho ou na vida pessoal. O que você disse? Como a pessoa reagiu? Qual foi o resultado?" rows="3"></textarea>
+    </div>
+    <div class="field"><label>Tem algo mais que queira nos contar? <small>(opcional)</small></label>
+      <textarea id="obs" placeholder="Qualquer informação relevante para sua candidatura." rows="2"></textarea>
+    </div>
+    <div class="info-box"><strong>O que acontece depois?</strong> Nossa equipe analisa todas as respostas com atenção e entra em contato pelo WhatsApp em até 2 dias úteis. Todos os candidatos recebem retorno — seja para uma entrevista ou para deixarmos no banco de talentos para próximas oportunidades.</div>
+  </div>
+  <div class="btn-row"><button class="btn-bk" onclick="bk(7)">← Voltar</button><button class="btn-nx" id="btn-env" onclick="enviar()">Enviar candidatura ✈️</button></div>
+</div>
+
+<!-- RESULTADO -->
+<div id="s-res" class="pg">
+  <div class="res-hero">
+    <div class="res-icon" id="r-icon">🎉</div>
+    <div class="res-title" id="r-title"></div>
+    <div class="res-score" id="r-score"></div>
+    <div class="res-desc" id="r-desc"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resumo da sua candidatura</div>
+    <div class="res-rows" id="r-rows"></div>
+    <div class="sc-bars" id="r-bars"></div>
+  </div>
+  <div style="text-align:center;font-size:12px;color:var(--t2);margin-top:16px;line-height:1.7">Candidatura registrada. Acompanhe seu WhatsApp — retornamos em até <strong>2 dias úteis</strong>.</div>
+</div>
 
 </div>
 
 <script>
-  let currentStep = 1;
-  const totalSteps = 5;
+const TOTAL=7, APPS='https://script.google.com/macros/s/AKfycbxETk6-zorrhbYFaA0_B58mJ3QEghh3H-4xfX7hAqgNx-V45K34SauY-cUbOirNKBUr-g/exec';
+let cur=1;
 
-  function goTo(step) {
-    document.getElementById(`step${currentStep}`).classList.remove('active');
-    currentStep = step;
-    document.getElementById(`step${currentStep}`).classList.add('active');
-    updateProgress();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+function nx(s){if(!val(s))return;go(s+1);}
+function bk(s){go(s-1);}
+function go(s){
+  const pid=cur===0?'s-res':'s'+cur;
+  document.getElementById(pid).classList.remove('on');
+  cur=s;
+  const nid=s===0?'s-res':'s'+s;
+  document.getElementById(nid).classList.add('on');
+  upP();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function upP(){
+  if(cur===0)return;
+  const p=Math.round(((cur-1)/TOTAL)*100);
+  document.getElementById('pb-fill').style.width=p+'%';
+  document.getElementById('pb-pct').textContent=p+'%';
+  document.getElementById('pb-lbl').textContent='Etapa '+cur+' de '+TOTAL;
+  for(let i=1;i<=TOTAL;i++){const d=document.getElementById('pd'+i);d.className='pbd'+(i<cur?' done':i===cur?' cur':'');}
+}
+function val(s){
+  const e=m=>{alert(m);return false;};
+  if(s===1){if(!g('nome'))return e('Preencha seu nome.');if(!g('whatsapp'))return e('Preencha seu WhatsApp.');if(!g('cidade'))return e('Preencha sua cidade.');if(!g('escolaridade'))return e('Selecione sua escolaridade.');if(!g('origem'))return e('Nos diga como soube da vaga.');if(!r('exp'))return e('Informe sua experiência.');}
+  if(s===2){if(!r('vaga'))return e('Selecione uma vaga.');if(!r('disp'))return e('Informe sua disponibilidade.');}
+  if(s===3){if(!r('qc1')||!r('qc2')||!r('qc3')||!r('qc4')||!r('qc5'))return e('Responda todas as perguntas de cultura.');}
+  if(s===4){if(!r('qp1')||!r('qp2'))return e('Responda as perguntas de perfil.');}
+  if(s===5){if(!r('qv1')||!r('qv2')||!r('qv3')||!r('qv4'))return e('Responda todas as situações de vendas.');}
+  if(s===7){if(!g('salario'))return e('Selecione a faixa de renda que você quer atingir.');if(!g('motivo'))return e('Nos conte por que quer trabalhar na CVM.');}
+  return true;
+}
+const g=id=>{const e=document.getElementById(id);return e&&e.value.trim();};
+const r=n=>{const e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:null;};
+const cks=n=>Array.from(document.querySelectorAll('input[name="'+n+'"]:checked')).map(e=>e.value).join(', ');
+function osel(c,n){c.closest('.opts,.cq,.field,.card').querySelectorAll('.oc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');}
+function sV(el){document.querySelectorAll('.vc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function chkSel(c,n,mx){const all=document.querySelectorAll('input[name="'+n+'"]');const ch=Array.from(all).filter(x=>x.checked);const cb=c.querySelector('input[type="checkbox"]');if(!cb.checked&&ch.length>=mx){cb.checked=false;return;}c.classList.toggle('sel',cb.checked);}
 
-  function updateProgress() {
-    const pct = Math.round(((currentStep - 1) / totalSteps) * 100);
-    document.getElementById('progressBar').style.width = pct + '%';
-    document.getElementById('stepLabel').textContent = `Etapa ${currentStep} de ${totalSteps}`;
-    document.getElementById('stepPct').textContent = pct + '%';
-  }
+function score(){
+  let sc={vendas:0,cultura:0,turismo:0,logica:0,disp:0};
+  // CULTURA — filtro principal (max 15)
+  sc.cultura+={A:3,B:2,C:1,D:0}[r('qc1')]||0;  // ranking
+  sc.cultura+={A:3,B:3,C:2,D:0}[r('qc2')]||0;  // renda incerta
+  sc.cultura+={A:3,B:2,C:2,D:0}[r('qc3')]||0;  // trabalho em equipe
+  sc.cultura+={A:3,B:3,C:0,D:0}[r('qc4')]||0;  // honestidade (C e D são eliminatórios)
+  sc.cultura+={A:3,B:3,C:0,D:1}[r('qc5')]||0;  // propósito
+  const elim=(r('qc2')==='D')||(r('qc4')==='C')||(r('qc4')==='D')||(r('qc1')==='D');
+  // VENDAS (max 14)
+  sc.vendas+={B:3,C:1,D:1,A:0}[r('qv1')]||0;
+  sc.vendas+={B:3,D:2,C:2,A:0}[r('qv2')]||0;
+  sc.vendas+={B:3,A:1,D:1,C:0}[r('qv3')]||0;
+  sc.vendas+={B:3,D:1,A:0,C:0}[r('qv4')]||0;
+  sc.vendas+={turismo:3,vendas:2,informal:2,nenhuma:0}[r('exp')]||0;
+  const mt=parseInt(document.getElementById('meta-slider').value);
+  if(mt>=8)sc.vendas+=2;else if(mt>=6)sc.vendas+=1;
+  // TURISMO (max 7)
+  sc.turismo+={varios:3,um:2,nao_quero:1,nao:0}[r('qviajou')]||0;
+  sc.turismo+={muito:2,pouco:1,nao:0}[r('qconteudo')]||0;
+  if(cks('motiv').includes('viagens'))sc.turismo+=2;
+  // LÓGICA (max 3) — correto: R$4800 + R$4800×0.85 = R$8880
+  if(r('qlogica')==='certo')sc.logica+=3;
+  // DISPONIBILIDADE (max 3)
+  sc.disp+={integral_dom:3,integral_sab:2,ressalva:1,parcial:0}[r('disp')]||0;
+  const total=Object.values(sc).reduce((a,b)=>a+b,0);
+  return{sc,total,max:42,pct:Math.round(total/42*100),elim};
+}
 
-  function getRadioValue(name) {
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    return el ? el.value : null;
-  }
-
-  function calcScore() {
-    let score = 0;
-    let total = 0;
-
-    // Vendas situação 1: B é melhor (descoberta de necessidade)
-    const v1 = getRadioValue('venda1');
-    total += 2;
-    if (v1 === 'B') score += 2;
-    else if (v1 === 'C' || v1 === 'D') score += 1;
-
-    // Vendas situação 2: B é melhor
-    const v2 = getRadioValue('venda2');
-    total += 2;
-    if (v2 === 'B') score += 2;
-    else if (v2 === 'C') score += 1;
-
-    // Lógica: R$9.120 é correto (4800 + 4800*0.85)
-    const l1 = getRadioValue('logica1');
-    total += 3;
-    if (l1 === 'certo') score += 3;
-
-    // Comportamental — sem certo/errado, apenas sinaliza
-    const comp1 = getRadioValue('comp1');
-    const comp2 = getRadioValue('comp2');
-
-    // Afinidade — valoriza quem tem conexão com viagens
-    const viajou = getRadioValue('viajou');
-    total += 1;
-    if (viajou === 'sim_varios' || viajou === 'sim_um' || viajou === 'nao_quero') score += 1;
-
-    const conteudo = getRadioValue('conteudo');
-    total += 1;
-    if (conteudo === 'sim_muito') score += 1;
-    else if (conteudo === 'sim_pouco') score += 0.5;
-
-    // Meta slider
-    const metaVal = parseInt(document.getElementById('metaSlider').value);
-    total += 2;
-    if (metaVal >= 8) score += 2;
-    else if (metaVal >= 6) score += 1;
-
-    return { score: Math.round(score), total, pct: Math.round((score / total) * 100) };
-  }
-
-  function getProfileTag(comp1) {
-    const map = {
-      'A': '🔴 Dominante (Alta energia, orientado a resultado)',
-      'B': '🟡 Influente (Comunicativo, engaja pessoas)',
-      'C': '🔵 Analítico (Cuidadoso, foco na qualidade)',
-      'D': '🟢 Estável (Calmo, segue processos)'
-    };
-    return map[comp1] || '— Não respondido';
-  }
-
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxETk6-zorrhbYFaA0_B58mJ3QEghh3H-4xfX7hAqgNx-V45K34SauY-cUbOirNKBUr-g/exec';
-
-  function submitForm() {
-    const nome = document.getElementById('nome').value || 'Candidato(a)';
-    const { score, total, pct } = calcScore();
-    const comp1 = getRadioValue('comp1');
-    const disponibilidade = getRadioValue('disponibilidade');
-    const salario = document.getElementById('salario').value;
-
-    let nivel = '';
-    let nivelClass = '';
-    if (pct >= 75) { nivel = '🟢 Alto potencial'; nivelClass = 'good'; }
-    else if (pct >= 50) { nivel = '🟡 Potencial mediano'; nivelClass = 'mid'; }
-    else { nivel = '🔴 Precisa de atenção'; nivelClass = 'low'; }
-
-    const dispMap = {
-      'sim_integral': '✅ Disponibilidade total (seg–sáb + escala dom)',
-      'sim_ressalva': '⚠️ Disponível com ressalva',
-      'nao_domingo': '❌ Não pode aos domingos',
-      'nao': '❌ Sem disponibilidade para o horário'
-    };
-
-    const salMap = {
-      'ate1500': 'Até R$ 1.500',
-      '1500a2500': 'R$ 1.500 – R$ 2.500',
-      '2500a3500': 'R$ 2.500 – R$ 3.500',
-      'acima3500': 'Acima de R$ 3.500'
-    };
-
-    // Monta payload completo
-    const payload = {
-      nome,
-      whatsapp: document.getElementById('whatsapp').value,
-      email: document.getElementById('email').value,
-      cidade: document.getElementById('cidade').value,
-      exp_vendas: getRadioValue('exp_vendas'),
-      comp1: getRadioValue('comp1'),
-      comp2: getRadioValue('comp2'),
-      motivacao: Array.from(document.querySelectorAll('input[name="motivacao"]:checked')).map(el => el.value).join(', '),
-      umapalavra: document.getElementById('umapalavra').value,
-      venda1: getRadioValue('venda1'),
-      venda2: getRadioValue('venda2'),
-      metaSlider: document.getElementById('metaSlider').value,
-      plataformas: document.getElementById('plataformas').value,
-      viajou: getRadioValue('viajou'),
-      destinosonho: document.getElementById('destinosonho').value,
-      emocao: getRadioValue('emocao'),
-      conteudo: getRadioValue('conteudo'),
-      disponibilidade: dispMap[disponibilidade] || disponibilidade,
-      ressalva_horario: document.getElementById('ressalva_horario').value,
-      salario: salMap[salario] || salario,
-      motivacao_cvm: document.getElementById('motivacao_cvm').value,
-      recado: document.getElementById('recado').value,
-      pontuacao: `${score}/${total} (${pct}%)`,
-      classificacao: nivel
-    };
-
-    // Envia para Google Sheets (no-cors)
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(() => {}); // silencia erro de CORS — o dado chega mesmo assim
-
-    document.getElementById('resultSummary').innerHTML = `
-      <div class="result-row"><span class="label">Candidato(a)</span><span class="value">${nome}</span></div>
-      <div class="result-row"><span class="label">Pontuação técnica</span><span class="value ${nivelClass}">${score}/${total} pontos · ${pct}%</span></div>
-      <div class="result-row"><span class="label">Perfil comportamental</span><span class="value">${getProfileTag(comp1)}</span></div>
-      <div class="result-row"><span class="label">Disponibilidade</span><span class="value">${dispMap[disponibilidade] || '—'}</span></div>
-      <div class="result-row"><span class="label">Expectativa salarial</span><span class="value">${salMap[salario] || '—'}</span></div>
-      <div class="result-row"><span class="label">Classificação</span><span class="value ${nivelClass}">${nivel}</span></div>
-    `;
-
-    // Esconde steps
-    for (let i = 1; i <= totalSteps; i++) {
-      document.getElementById(`step${i}`).classList.remove('active');
-    }
-
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('stepLabel').textContent = 'Concluído!';
-    document.getElementById('stepPct').textContent = '100%';
-
-    document.getElementById('successScreen').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+function enviar(){
+  if(!val(7))return;
+  const btn=document.getElementById('btn-env');
+  btn.disabled=true;btn.textContent='Enviando...';
+  const{sc,total,pct,elim}=score();
+  let nivel,icon,desc,cls;
+  if(elim){nivel='Perfil não compatível neste momento';icon='📬';cls='rs-baixo';desc='Algumas das suas respostas indicam que o modelo de trabalho da CVM pode não ser o mais adequado para o seu momento atual. Guardaremos seus dados para futuras oportunidades.';}
+  else if(pct>=68){nivel='Alto potencial';icon='⭐';cls='rs-alto';desc='Seu perfil está muito alinhado com a cultura e as exigências da CVM. Aguarde nosso contato — você é prioridade no processo seletivo.';}
+  else if(pct>=45){nivel='Perfil compatível';icon='✅';cls='rs-med';desc='Seu perfil tem pontos positivos e compatíveis com a vaga. Analisaremos com atenção e entraremos em contato em breve.';}
+  else{nivel='Candidatura recebida';icon='📬';cls='rs-baixo';desc='Recebemos sua candidatura. Pode não ser o momento ideal, mas guardaremos seus dados para futuras oportunidades.';}
+  const dMap={integral_dom:'✅ Integral + domingos',integral_sab:'✅ Integral seg–sáb',ressalva:'⚠️ Com ressalva',parcial:'⚠️ Meio período'};
+  const sMap={'2000a3000':'R$ 2.000–3.000','3000a4000':'R$ 3.000–4.000','4000a5000':'R$ 4.000–5.000',acima5000:'Acima de R$ 5.000'};
+  const pMap={A:'🔴 Dominante',B:'🟡 Influente',C:'🔵 Analítico',D:'🟢 Estável'};
+  const payload={data:new Date().toLocaleString('pt-BR'),nome:g('nome'),idade:g('idade')||'—',whatsapp:g('whatsapp'),email:g('email')||'—',cidade:g('cidade'),escolaridade:g('escolaridade')||'—',origem:g('origem')||'—',vaga:r('vaga')||'—',exp_vendas:r('exp')||'—',disponibilidade:dMap[r('disp')]||'—',ressalva:g('ressalva')||'—',qc1_ranking:r('qc1')||'—',qc2_renda:r('qc2')||'—',qc3_equipe:r('qc3')||'—',qc4_honestidade:r('qc4')||'—',qc5_proposito:r('qc5')||'—',flag_eliminatorio:elim?'⚠️ SIM':'Não',perfil:pMap[r('qp1')]||'—',qp2:r('qp2')||'—',umapalavra:g('umapalavra')||'—',motivacoes:cks('motiv'),qv1:r('qv1')||'—',qv2:r('qv2')||'—',qv3_seguro:r('qv3')||'—',qv4_lead:r('qv4')||'—',meta_slider:document.getElementById('meta-slider').value,plataformas:g('plataformas')||'—',viajou:r('qviajou')||'—',destino:g('destino')||'—',conteudo:r('qconteudo')||'—',logica:r('qlogica')==='certo'?'✅ Correto R$8.880':'❌ Incorreto',salario:sMap[g('salario')]||'—',motivo:g('motivo')||'—',situacao:g('situacao')||'—',obs:g('obs')||'—',score_total:total+'/42 ('+pct+'%)',score_cultura:sc.cultura+'/15',score_vendas:sc.vendas+'/14',score_turismo:sc.turismo+'/7',score_logica:sc.logica+'/3',score_disp:sc.disp+'/3',classificacao:nivel};
+  fetch(APPS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  document.getElementById('r-icon').textContent=icon;
+  document.getElementById('r-title').textContent=nivel;
+  document.getElementById('r-score').className='res-score '+cls;
+  document.getElementById('r-score').textContent=elim?'—':pct+'% de alinhamento';
+  document.getElementById('r-desc').textContent=desc;
+  const rows=[{l:'Candidato(a)',v:g('nome')},{l:'Vaga',v:(r('vaga')||'—').split('—')[0]},{l:'Perfil',v:pMap[r('qp1')]||'—'},{l:'Disponibilidade',v:dMap[r('disp')]||'—'},{l:'Expectativa',v:sMap[g('salario')]||'—'},{l:'Classificação',v:nivel,c:cls==='rs-alto'?'rv-g':cls==='rs-med'?'rv-a':'rv-r'}];
+  document.getElementById('r-rows').innerHTML=rows.map(row=>`<div class="rrow"><span class="rl">${row.l}</span><span class="rv ${row.c||''}">${row.v}</span></div>`).join('');
+  if(!elim){const bars=[{l:'Cultura & Valores',v:sc.cultura,m:15},{l:'Vendas',v:sc.vendas,m:14},{l:'Turismo',v:sc.turismo,m:7},{l:'Lógica',v:sc.logica,m:3}];document.getElementById('r-bars').innerHTML='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t2);margin-bottom:12px">Score por dimensão</div>'+bars.map(b=>{const p=Math.min(Math.round(b.v/b.m*100),100);const c=p>=70?'var(--gr)':p>=40?'var(--am)':'var(--rd)';return`<div class="sb-row"><div class="sb-lbl">${b.l}</div><div class="sb-track"><div class="sb-fill" style="width:${p}%;background:${c}"></div></div><div class="sb-val" style="color:${c}">${p}%</div></div>`;}).join('');}
+  for(let i=1;i<=TOTAL;i++){const el=document.getElementById('s'+i);if(el)el.classList.remove('on');}
+  document.getElementById('pb-fill').style.width='100%';document.getElementById('pb-lbl').textContent='Concluído!';document.getElementById('pb-pct').textContent='100%';document.querySelectorAll('.pbd').forEach(d=>d.className='pbd done');
+  document.getElementById('s-res').classList.add('on');window.scrollTo({top:0,behavior:'smooth'});
+}
 </script>
 </body>
 </html>
+ENDOFFILE
+wc -c /home/claude/cvm-triagem-final.html && echo "OK"
